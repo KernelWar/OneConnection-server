@@ -1,0 +1,35 @@
+{
+    "name": "mouse",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "electromon .",
+        "start-e": "electron ."
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "battery-level": "^3.0.0",
+        "bootstrap": "^4.5.0",
+        "brightness": "^3.0.0",
+        "cors": "^2.8.5",
+        "electron-store": "^6.0.0",
+        "express": "^4.17.1",
+        "ffi-napi": "^3.0.1",
+        "fs": "0.0.1-security",
+        "ip": "^1.1.5",
+        "jquery": "^3.5.1",
+        "node-cmd": "^3.0.0",
+        "node-disk-info": "^1.1.0",
+        "qrcode": "^1.4.4",
+        "socket.io": "^2.3.0",
+        "system-control": "^0.1.1",
+        "win-audio": "^2.0.2"
+    },
+    "devDependencies": {
+        "electromon": "^1.0.10",
+        "electron": "^9.1.1",
+        "electron-rebuild": "^1.11.0"
+    }
+}
