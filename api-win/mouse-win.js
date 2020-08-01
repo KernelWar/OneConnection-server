@@ -1,12 +1,28 @@
 const { screen } = require('electron')
 const ffi = require('ffi-napi')
+const ref = require('ref-napi')
+
 var s = 10
+var winapi = {};
+winapi.bool = ref.types.bool;
+winapi.int = ref.types.int;
+winapi.ulong = ref.types.ulong;
+winapi.void = ref.types.void;
+winapi.PVOID = ref.refType(winapi.void);
+winapi.HANDLE = winapi.PVOID;
+winapi.HWND = winapi.HANDLE;
+winapi.WCHAR = ref.types.char;
+winapi.LPCWSTR = ref.types.CString;
+winapi.UINT = ref.types.uint;
 
 var user32 = ffi.Library('user32', {
     'SetCursorPos': ['long', ['long', 'long']],
     'mouse_event': ['void', ['int', 'int', 'int', 'int', 'int']],
-    'SystemParametersInfoA': ['void', ['int', 'int', 'int', 'int']]
+    'SystemParametersInfoA': ['int', ['int', 'int', winapi.PVOID  , 'int']]
 });
+
+
+
 const MOUSEEVENTF_LEFTDOWN = 0x02
 const MOUSEEVENTF_LEFTUP = 0x04
 
@@ -15,7 +31,11 @@ const MOUSEEVENTF_RIGHTUP = 0x10
 
 
 const SPI_SETMOUSESPEED = 0x0071
+const SPI_GETMOUSESPEED = 0x0070
 
+
+//VALOR DE VELOCIDAD QUE WINDOWS TIENE POR DEFAULT
+const SPEEDMOUSE = getSpeedMouse()
 
 
 timeFastTouch = 100
@@ -94,13 +114,24 @@ function moveMouse(coords) {
             user32.SetCursorPos(ix, iy)
         }
     }
-    setSpeedMouse(10)
-        // console.log(screen.getCursorScreenPoint())
+    setSpeedMouse(SPEEDMOUSE)
+    // console.log(screen.getCursorScreenPoint())
 }
 
 function setSpeedMouse(speed) {
-    user32.SystemParametersInfoA(SPI_SETMOUSESPEED, 0, speed, 0);
+    var setSpeed = new Buffer(4)
+    setSpeed.writeInt32LE(speed, 0)
+    user32.SystemParametersInfoA(SPI_SETMOUSESPEED, 0, setSpeed, 0);
 }
+
+function getSpeedMouse() {
+    var getSpeed = new Buffer(4)
+    var data = user32.SystemParametersInfoA(SPI_GETMOUSESPEED, 0, getSpeed, 0);
+    getSpeed.type = ref.types.int
+    //console.log("speed: ", getSpeed.deref())
+    return getSpeed.deref()
+}
+
 
 function clickLeft() {
     let cursor = screen.getCursorScreenPoint();

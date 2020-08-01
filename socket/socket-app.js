@@ -1,5 +1,5 @@
 const socket = require('socket.io')
-const store = new(require('electron-store'));
+const store = new (require('electron-store'));
 const volume = require('../api-win/volume-win')
 const mouse = require("../api-win/mouse-win")
 const brightness = require("../api-win/brightness-win")
@@ -8,8 +8,16 @@ const directories = require("../api-win/directories-win")
 let io = null
 
 function initServer(server) {
-    io = socket(server)    
+    io = socket(server)
+    const checkConnected = setInterval(() => {
+        let clients = io.engine.clientsCount
+        if (clients == 0) {
+            store.delete('system')
+            store.delete('device')
+        }
+    }, 1000)
 }
+
 
 function listenInConnect() {
     io.on('connect', () => {
@@ -30,8 +38,6 @@ function listenInConnect() {
                 io.emit("onBattery", 0)
             }
         })
-
-        
     })
 }
 
@@ -39,15 +45,17 @@ function listenInConnection() {
 
     io.on("connection", socket => {
         socket.on("onDevice", (data) => {
-            console.log("onDevice: ",data)
+            console.log("onDevice: ", data)
             store.set("system", data.system)
             store.set("device", data.device)
         })
+        /*
         socket.on('disconnect', (reason) => {
             console.log("cliente desconectado: ", reason)
             store.delete('system')
-            store.delete('device')
+            store.delete('device')            
         });
+        */
 
         socket.on("saludo", res => {
             console.log("hola mundo");

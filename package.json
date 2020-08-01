@@ -23,6 +23,7 @@
         "node-cmd": "^3.0.0",
         "node-disk-info": "^1.1.0",
         "qrcode": "^1.4.4",
+        "ref-napi": "^2.0.3",
         "socket.io": "^2.3.0",
         "system-control": "^0.1.1",
         "win-audio": "^2.0.2"
