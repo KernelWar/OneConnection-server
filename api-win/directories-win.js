@@ -1,6 +1,6 @@
 const nodeDiskInfo = require('node-disk-info')
 const fs = require('fs');
-const cmd =require('node-cmd');
+const cmd = require('node-cmd');
 
 async function getDiskInfo() {
     return await nodeDiskInfo.getDiskInfo().then(disks => {
@@ -66,12 +66,12 @@ function checkIsFile(dir, file) {
 }
 
 
-async function executeFile(dirFull){
-    let wait = new Promise((resolve, reject)=>{
-        cmd.get('start \"\" \"'+dirFull+"\"", function(err, data){
-            if(err){
+async function executeFile(dirFull) {
+    let wait = new Promise((resolve, reject) => {
+        cmd.get('start \"\" \"' + dirFull + "\"", function (err, data) {
+            if (err) {
                 reject(err)
-            }else{
+            } else {
                 resolve("success")
             }
         })
@@ -79,4 +79,18 @@ async function executeFile(dirFull){
     return wait
 }
 
-module.exports = { getDiskInfo, getDiretory, executeFile }
+async function getUserName() {
+    let wait = new Promise((resolve, reject)=>{
+        cmd.get('echo {%username%}', function(err,data){
+            if(err){
+                reject(err)
+            }else{
+                resolve(data)
+            }
+        })
+    })
+    return wait
+}
+
+
+module.exports = { getDiskInfo, getDiretory, executeFile, getUserName }

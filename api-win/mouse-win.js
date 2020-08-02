@@ -2,8 +2,10 @@ const { screen } = require('electron')
 const ffi = require('ffi-napi')
 const ref = require('ref-napi')
 
-var s = 10
 var winapi = {};
+winapi.void = ref.types.void;
+winapi.PVOID = ref.refType(winapi.void);
+/*
 winapi.bool = ref.types.bool;
 winapi.int = ref.types.int;
 winapi.ulong = ref.types.ulong;
@@ -14,14 +16,15 @@ winapi.HWND = winapi.HANDLE;
 winapi.WCHAR = ref.types.char;
 winapi.LPCWSTR = ref.types.CString;
 winapi.UINT = ref.types.uint;
-
+*/
 var user32 = ffi.Library('user32', {
-    'SetCursorPos': ['long', ['long', 'long']],
-    'mouse_event': ['void', ['int', 'int', 'int', 'int', 'int']],
-    'SystemParametersInfoA': ['int', ['int', 'int', winapi.PVOID  , 'int']]
+    SetCursorPos: ['long', ['long', 'long']],
+    mouse_event: ['void', ['int', 'int', 'int', 'int', 'int']],
+    SystemParametersInfoA: ['int', ['int', 'int', winapi.PVOID  , 'int']]
 });
 
 
+var s = 10
 
 const MOUSEEVENTF_LEFTDOWN = 0x02
 const MOUSEEVENTF_LEFTUP = 0x04

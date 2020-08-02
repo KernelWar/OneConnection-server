@@ -5,6 +5,7 @@ const mouse = require("../api-win/mouse-win")
 const brightness = require("../api-win/brightness-win")
 const battery = require("../api-win/battery-win")
 const directories = require("../api-win/directories-win")
+const shorcutsMedia = require("../api-win/shortcuts-media-win")
 let io = null
 
 function initServer(server) {
@@ -38,6 +39,17 @@ function listenInConnect() {
                 io.emit("onBattery", 0)
             }
         })
+
+        directories.getUserName().then((username)=>{
+            let data = username
+            let regex = /{([^}]*)}/g
+            var extract = data.match(regex).toString()            
+            data = extract.substring(1,extract.length-1)
+            io.emit("onUserName", data)
+        }).catch((error)=>{
+            console.log("error username: ",error)
+            io.emit("onUserName", '.fail.')
+        })
     })
 }
 
@@ -49,14 +61,6 @@ function listenInConnection() {
             store.set("system", data.system)
             store.set("device", data.device)
         })
-        /*
-        socket.on('disconnect', (reason) => {
-            console.log("cliente desconectado: ", reason)
-            store.delete('system')
-            store.delete('device')            
-        });
-        */
-
         socket.on("saludo", res => {
             console.log("hola mundo");
         });
@@ -102,7 +106,6 @@ function listenInConnection() {
                 socket.emit("onDirectory", "fail")
             })
         })
-
         socket.on("executeFile", (dir) => {
             let wait = Promise.resolve(directories.executeFile(dir))
             wait.then((res) => {
@@ -111,7 +114,15 @@ function listenInConnection() {
                 socket.emit("onExecuteFile", "fail")
             })
         })
-
+        socket.on("playOrPause",()=>{
+            shorcutsMedia.play()
+        })
+        socket.on("backMedia",()=>{
+            shorcutsMedia.back()
+        })
+        socket.on("nextMedia",()=>{
+            shorcutsMedia.next()
+        })
     });
 
 }
