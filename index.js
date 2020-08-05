@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow,  Menu, Tray  } = require('electron')
 
 const express = require('express')
 const http = require('http')
@@ -39,8 +39,28 @@ function createWindow() {
         center: true,
     
     })
-    win.loadFile('./public/index.html')
+    win.loadFile('./src/index.html')
     win.removeMenu()
+
+    let tray = new Tray('logo.ico')
+    const ctx = Menu.buildFromTemplate([
+        { label: 'Ver conexión', type: 'normal'},
+        { label: 'Reiniciar app', type: 'normal'},
+        { type: 'separator'},
+        { label: 'Cerrar todo', type: 'normal'}
+    ])
+    tray.setContextMenu(ctx)
+    tray.setTitle("app server")
+    tray.setToolTip("Ejecucion en segundo plano")
+    tray.focus()
+    tray.setImage('logo.ico')
+    tray.displayBalloon({
+        title: 'Hola mundo',
+        content: 'Esto es el icono de segundo plano',
+        iconType: 'info',
+        icon: 'logo.ico'
+    })
+    console.log(tray.isDestroyed())
 }
 
 app.on('ready', createWindow)

@@ -30,6 +30,7 @@ async function getDiretory(dir) {
                 reject(err)
             } else {
                 let data = []
+                files = orderByType(files,dir)
                 files.forEach(file => {
                     if (checkReadAutorization(dir + file)) {
                         let obj = {
@@ -47,6 +48,24 @@ async function getDiretory(dir) {
     })
     return wait
 }
+
+function orderByType(files, dir){
+    let directories = []
+    let _files = []
+    files.forEach(item => {
+        if(checkReadAutorization(dir+item)){
+            if(checkIsFile(dir,item) == "directory"){
+                directories.push(item)
+            }else{
+                _files.push(item)
+            }
+        }
+    });
+
+    let list = directories.concat(_files)
+    return list    
+}
+
 
 function checkReadAutorization(dirFull) {
     try {
@@ -81,10 +100,14 @@ async function executeFile(dirFull) {
 
 async function getUserName() {
     let wait = new Promise((resolve, reject)=>{
-        cmd.get('echo {%username%}', function(err,data){
+        cmd.get('echo {%username%}', function(err,username){
             if(err){
                 reject(err)
             }else{
+                let data = username
+                let regex = /{([^}]*)}/g
+                var extract = data.match(regex).toString()            
+                data = extract.substring(1,extract.length-1)
                 resolve(data)
             }
         })
