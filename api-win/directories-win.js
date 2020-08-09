@@ -36,7 +36,8 @@ async function getDiretory(dir) {
                         let obj = {
                             type: checkIsFile(dir, file),
                             name: file,
-                            pathFull: dir + file
+                            pathFull: dir + file,
+                            selected: false
                         }
                         data.push(obj)
                     }
@@ -98,22 +99,5 @@ async function executeFile(dirFull) {
     return wait
 }
 
-async function getUserName() {
-    let wait = new Promise((resolve, reject)=>{
-        cmd.get('echo {%username%}', function(err,username){
-            if(err){
-                reject(err)
-            }else{
-                let data = username
-                let regex = /{([^}]*)}/g
-                var extract = data.match(regex).toString()            
-                data = extract.substring(1,extract.length-1)
-                resolve(data)
-            }
-        })
-    })
-    return wait
-}
 
-
-module.exports = { getDiskInfo, getDiretory, executeFile, getUserName }
+module.exports = { getDiskInfo, getDiretory, executeFile}

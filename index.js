@@ -1,13 +1,14 @@
-const { app, BrowserWindow,  Menu, Tray  } = require('electron')
+const { app, BrowserWindow,  Menu, Tray } = require('electron')
 
 const express = require('express')
 const http = require('http')
 const ip = require('ip')
 const cors = require('cors')
 const socket = require('./socket/socket-app')
-const store = new(require('electron-store'));
+const store = new(require('electron-store'))
 const appexpress = express()
 const server = http.createServer(appexpress)
+
 socket.initServer(server)
 var host = ip.address()
 var port = 8080
@@ -24,6 +25,7 @@ server.listen(appexpress.get('port'), appexpress.get('host'), () => {
     store.set('m.kw.port', port)
     console.log(`Server listening on ${host}:${port}`)
 })
+
 socket.listenInConnect()
 socket.listenInConnection()
 
@@ -42,6 +44,11 @@ function createWindow() {
     win.loadFile('./src/index.html')
     win.removeMenu()
 
+    
+    
+}
+
+function createTray(){
     let tray = new Tray('logo.ico')
     const ctx = Menu.buildFromTemplate([
         { label: 'Ver conexión', type: 'normal'},
@@ -52,7 +59,6 @@ function createWindow() {
     tray.setContextMenu(ctx)
     tray.setTitle("app server")
     tray.setToolTip("Ejecucion en segundo plano")
-    tray.focus()
     tray.setImage('logo.ico')
     tray.displayBalloon({
         title: 'Hola mundo',
@@ -60,7 +66,9 @@ function createWindow() {
         iconType: 'info',
         icon: 'logo.ico'
     })
-    console.log(tray.isDestroyed())
 }
 
-app.on('ready', createWindow)
+app.on('ready', ()=>{
+    createWindow()
+    createTray()
+})

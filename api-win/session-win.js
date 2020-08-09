@@ -1,4 +1,5 @@
 const cmd = require('node-cmd');
+
 let message = {
     error: false,
     status: '',
@@ -86,5 +87,4 @@ async function lock(){
 }
 
 
-
-module.exports = { turnOff, restart, suspend, lock }
+module.exports = { turnOff, restart, suspend, lock}

@@ -20,17 +20,19 @@ winapi.WCHAR = ref.types.char;
 winapi.LPCWSTR = ref.types.CString;
 winapi.UINT = ref.types.uint;
 */
-var user32 = ffi.Library('user32', {
-    SetCursorPos: ['long', ['long', 'long']],
-    mouse_event: ['void', ['int', 'int', 'int', 'int', 'int']],
-    SystemParametersInfoA: ['int', ['int', 'int', winapi.PVOID, 'int']],
-    SetScrollPos: ['int32', [winapi.HWND, 'int', 'int', 'bool']],
+
+/*
+SetScrollPos: ['int32', [winapi.HWND, 'int', 'int', 'bool']],
     GetScrollPos: ['int32', [winapi.HWND, 'int32']],
     GetFocus: [winapi.HWND, []],
     GetActiveWindow: [winapi.HWND, []],
     GetCapture: [winapi.HWND, []],
     GetForegroundWindow: [winapi.HWND, []],
-
+*/
+var user32 = ffi.Library('user32', {
+    SetCursorPos: ['long', ['long', 'long']],
+    mouse_event: ['void', ['int', 'int', 'int', 'int', 'int']],
+    SystemParametersInfoA: ['int', ['int', 'int', winapi.PVOID, 'int']],
 });
 
 
@@ -45,11 +47,11 @@ const MOUSEEVENTF_RIGHTUP = 0x10
 
 const SPI_SETMOUSESPEED = 0x0071
 const SPI_GETMOUSESPEED = 0x0070
-
+/*
 const SB_HORZ = 0;
 const SB_VERT = 1;
 const SB_CTL = 2;
-
+*/
 const MOUSEEVENTF_WHEEL = 0x0800
 
 //VALOR DE VELOCIDAD QUE WINDOWS TIENE POR DEFAULT
@@ -59,17 +61,11 @@ const SPEEDMOUSE = getSpeedMouse()
 timeFastTouch = 100
 timeSlowTouch = 0
 
-function moveScrollDown(value) {
-    user32.mouse_event(MOUSEEVENTF_WHEEL, 0, 0, -30, 0);
+function moveScrollDown() {
+    user32.mouse_event(MOUSEEVENTF_WHEEL, 0, 0, -20, 0);
 }
-function moveScrollUp(value) {
-    user32.mouse_event(MOUSEEVENTF_WHEEL, 0, 0, 30, 0);
-}
-function getScrollPos() {
-    var hwnd = user32.GetForegroundWindow()
-    console.log(hwnd)
-    let scroll = user32.GetScrollPos(hwnd, SB_VERT)
-    console.log("scroll vertical: ", scroll)
+function moveScrollUp() {
+    user32.mouse_event(MOUSEEVENTF_WHEEL, 0, 0, 20, 0);
 }
 
 function moveMouse(coords) {
@@ -185,7 +181,6 @@ module.exports = {
     clickLeft,
     clickRight,
     setSpeedMouse,
-    getScrollPos,
     moveScrollDown,
     moveScrollUp
 }
