@@ -1,5 +1,4 @@
 const socket = require('socket.io')
-const store = new (require('electron-store'))
 const volume = require('../api-win/volume-win')
 const mouse = require("../api-win/mouse-win")
 const brightness = require("../api-win/brightness-win")
@@ -10,19 +9,22 @@ const session = require("../api-win/session-win")
 const os = require('os')
 const os_utils = require('os-utils');    
 let io = null
-
 function initServer(server) {
     io = socket(server)
+    let updateData
     const checkConnected = setInterval(() => {
         if (clientConnected() == false) {
-            store.delete('system')
-            store.delete('device')
+            global._system = null
+            global._device = null
+            clearInterval(updateData)
+        }else{
+            updateData = setInterval(() => {
+                dataInit()
+            }, (60000 * 5))
         }
     }, 1000)
 
-    const updateData = setInterval(() => {
-        dataInit()
-    }, (60000 * 5))
+    
 }
 
 
@@ -151,8 +153,8 @@ function listenInConnection() {
     io.on("connection", socket => {
         socket.on("onDevice", (data) => {
             console.log("onDevice: ", data)
-            store.set("system", data.system)
-            store.set("device", data.device)
+            global._system = data.system
+            global._device = data.device
         })
 
         socket.on("setBrightness", (value) => {

@@ -1,15 +1,15 @@
-const { app, BrowserWindow,  Menu, Tray } = require('electron')
+const { app, BrowserWindow, Menu, Tray } = require('electron')
 
 const express = require('express')
 const http = require('http')
 const ip = require('ip')
 const cors = require('cors')
-const socket = require('./socket/socket-app')
-const store = new(require('electron-store'))
 const appexpress = express()
 const server = http.createServer(appexpress)
-
+const socket = require('./socket/socket-app')
 socket.initServer(server)
+
+
 var host = ip.address()
 var port = 8080
 appexpress.use(cors())
@@ -21,40 +21,39 @@ appexpress.get('/', (req, res) => {
     res.send("API funcionando !!")
 })
 server.listen(appexpress.get('port'), appexpress.get('host'), () => {
-    store.set('m.kw.host', host)
-    store.set('m.kw.port', port)
     console.log(`Server listening on ${host}:${port}`)
 })
 
 socket.listenInConnect()
 socket.listenInConnection()
 
+
+
 function createWindow() {
-    const win = new BrowserWindow({
+    let win = new BrowserWindow({
         width: 360,
-        height: 600,
+        //height: 600,
         resizable: false,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true
         },
         icon: 'logo.ico',
-        center: true,
-    
+        center: true
     })
     win.loadFile('./src/index.html')
     win.removeMenu()
-
-    
-    
+    global._port = port
+    global._host = host
 }
 
-function createTray(){
+function createTray() {
     let tray = new Tray('logo.ico')
     const ctx = Menu.buildFromTemplate([
-        { label: 'Ver conexión', type: 'normal'},
-        { label: 'Reiniciar app', type: 'normal'},
-        { type: 'separator'},
-        { label: 'Cerrar todo', type: 'normal'}
+        { label: 'Ver conexión', type: 'normal' },
+        { label: 'Reiniciar app', type: 'normal' },
+        { type: 'separator' },
+        { label: 'Cerrar todo', type: 'normal' }
     ])
     tray.setContextMenu(ctx)
     tray.setTitle("app server")
@@ -68,7 +67,6 @@ function createTray(){
     })
 }
 
-app.on('ready', ()=>{
+app.on('ready', () => {
     createWindow()
-    createTray()
 })

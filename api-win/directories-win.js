@@ -37,7 +37,7 @@ async function getDiretory(dir) {
                             type: checkIsFile(dir, file),
                             name: file,
                             pathFull: dir + file,
-                            selected: false
+                            //selected: false
                         }
                         data.push(obj)
                     }

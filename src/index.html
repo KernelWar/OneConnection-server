@@ -73,14 +73,15 @@
         </div>
     </div>
     <script>
-        window.jQuery = window.$ = require('jquery')
-        const store = new(require('electron-store'))
+        window.jQuery = window.$ = require('jquery')    
+        const remote = require('electron').remote   
         $("#wait-device").hide()
         $("#device-info").hide()
+        
         const checkDevice = setInterval(() => {
-            if (store.get('system') && store.get('device')) {
-                $("#txt-system").text(store.get('system'))
-                $("#txt-device").text(store.get('device'))
+            if (remote.getGlobal('_system') != null && remote.getGlobal('_device')  != null) {
+                $("#txt-system").text(remote.getGlobal('_system'))
+                $("#txt-device").text(remote.getGlobal('_device'))
                 $("#wait-device").hide()
                 $("#device-info").show()
             } else {
