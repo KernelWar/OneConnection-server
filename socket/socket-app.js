@@ -8,23 +8,20 @@ const shorcutsMedia = require("../api-win/shortcuts-media-win");
 const session = require("../api-win/session-win")
 const os = require('os')
 const os_utils = require('os-utils');    
+const { parse } = require('path')
 let io = null
 function initServer(server) {
     io = socket(server)
-    let updateData
+    
     const checkConnected = setInterval(() => {
         if (clientConnected() == false) {
             global._system = null
             global._device = null
-            clearInterval(updateData)
-        }else{
-            updateData = setInterval(() => {
-                dataInit()
-            }, (60000 * 5))
         }
     }, 1000)
-
-    
+    const updateData = setInterval(() => {
+        dataInit()
+    }, (60000 * 5))    
 }
 
 
@@ -65,6 +62,7 @@ function listenDirectoryModule(socket){
         let wait = Promise.resolve(directories.getDiskInfo())
         wait.then((data) => {
             socket.emit("onDisks", data)
+            console.log("onDisks -> OK")
         })
     })
 
@@ -72,17 +70,21 @@ function listenDirectoryModule(socket){
         let wait = Promise.resolve(directories.getDiretory(dir))
         wait.then(data => {
             socket.emit("onDirectory", data)
+            console.log("onDirectory -> OK")
         }).catch(error => {
             console.log("error recivido: ", error)
             socket.emit("onDirectory", "fail")
+            console.log("onDirectory -> FAIL")
         })
     })
     socket.on("executeFile", (dir) => {
         let wait = Promise.resolve(directories.executeFile(dir))
         wait.then((res) => {
-            socket.emit("onExecuteFile", res)
+            socket.emit("onExecuteFile", res)            
+            console.log("onExecuteFile -> OK")
         }).catch((error) => {
             socket.emit("onExecuteFile", "fail")
+            console.log("onExecuteFile -> FAIL")
         })
     })
 }
@@ -136,12 +138,22 @@ function listenSesionModule(socket){
         })
     })
 
-    setInterval(() => {            
+    setInterval(() => {  
+        /*  
+        os_utils.cpuFree(function(f){
+            let free = parseInt(f*100)
+            let cpu = {
+                free: (free)+"%",
+                used: 100-(free)+"%"
+            }
+            console.log(cpu)
+        })
+        */        
         os_utils.cpuUsage(function(v){        
             let mdis = os_utils.freememPercentage()*100
             let mUsed = 100-mdis
             let infoPc = {
-                cpu: (parseInt(v*100)),
+                cpu: Math.round((v*100)) ,
                 memory: parseInt(mUsed),
                 pc: os.hostname()
             }
@@ -176,7 +188,9 @@ function listenInConnection() {
 }
 function dataInit() {
     if (clientConnected()) {        
-        console.log("actualizando datos")
+        let date = new Date()
+        let time = "["+date.getHours() +":"+date.getMinutes()+":"+date.getSeconds()+"]"
+        console.log("actualizando datos -> ",time)
         volume.getVolume().then((vol) => {
             io.emit("onVolume", vol)
         })

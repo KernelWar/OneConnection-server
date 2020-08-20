@@ -1,7 +1,6 @@
 const nodeDiskInfo = require('node-disk-info')
 const fs = require('fs');
 const cmd = require('node-cmd');
-
 async function getDiskInfo() {
     return await nodeDiskInfo.getDiskInfo().then(disks => {
         return createData(disks)
@@ -22,7 +21,6 @@ function createData(disks) {
     });
     return data
 }
-
 async function getDiretory(dir) {
     let wait = new Promise((resolve, reject) => {
         fs.readdir(dir, (err, files) => {
