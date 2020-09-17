@@ -8,7 +8,6 @@ const shorcutsMedia = require("../api-win/shortcuts-media-win");
 const session = require("../api-win/session-win")
 const os = require('os')
 const os_utils = require('os-utils');    
-const { parse } = require('path')
 let io = null
 function initServer(server) {
     io = socket(server)
@@ -188,9 +187,7 @@ function listenInConnection() {
 }
 function dataInit() {
     if (clientConnected()) {        
-        let date = new Date()
-        let time = "["+date.getHours() +":"+date.getMinutes()+":"+date.getSeconds()+"]"
-        console.log("actualizando datos -> ",time)
+        console.log("update data -> ",getTimeNow())
         volume.getVolume().then((vol) => {
             io.emit("onVolume", vol)
         })
@@ -208,6 +205,9 @@ function dataInit() {
             }
         })
         sendUserName()
+        console.log("status-connection -> conected "+getTimeNow())
+    }else{
+        console.log("status-connection -> waiting "+getTimeNow())
     }
 }
 function sendUserName() {
@@ -223,4 +223,10 @@ function clientConnected() {
     return false
 }
 
+
+function getTimeNow(){
+    let date = new Date()
+    let time = "["+date.getHours() +":"+date.getMinutes()+":"+date.getSeconds()+"]"
+    return time
+}
 module.exports = { initServer, listenInConnect, listenInConnection }

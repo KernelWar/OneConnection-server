@@ -12,6 +12,7 @@
     "dependencies": {
         "battery-level": "^3.0.0",
         "bootstrap": "^4.5.0",
+        "bootstrap-icons": "^1.0.0",
         "brightness": "^3.0.0",
         "cors": "^2.8.5",
         "express": "^4.17.1",

@@ -32,17 +32,20 @@ socket.listenInConnection()
 function createWindow() {
     let win = new BrowserWindow({
         width: 360,
-        //height: 600,
+        height: 600,
         resizable: false,
         webPreferences: {
             nodeIntegration: true,
-            enableRemoteModule: true
+            enableRemoteModule: true,
         },
+        transparent: true,
+        frame: false,
         icon: 'logo.ico',
-        center: true
+        center: true,
+        maximizable: false
     })
     win.loadFile('./src/index.html')
-    win.removeMenu()
+    win.removeMenu()    
     global._port = port
     global._host = host
 }
@@ -69,4 +72,5 @@ function createTray() {
 
 app.on('ready', () => {
     createWindow()
+    createTray()
 })

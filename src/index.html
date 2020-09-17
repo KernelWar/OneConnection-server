@@ -2,69 +2,78 @@
 <html>
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Mouse server</title>
 
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
 
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap-grid.min.css">
-
+    <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap-grid.min.css" />
 </head>
 
 <body>
-    <div id="content-qr">
-        <br>
-        <h6>Con tu dispositivo escanea el QR</h6>
-        <canvas id="qr_ip" width="500"></canvas>
-    </div>
-    <div class="container">
-        <div id="device-info" class="row">
-            <div class="col-12">
-                <div class="card text-center">
-                    <div class="card-header">
-                        Dispositivo
-                    </div>
-                    <div class="card-body">
-                        <h5 id="txt-system" class="card-title">---</h5>
-                        <p id="txt-device" class="card-text">---</p>
-                        <img src="img/aplicacion.svg" width="30" alt="">
-                        <br><br>
-                        <span class="badge badge-primary">Conexión establecida</span>
-                        <div id="connect-success">
-                            <div class="spinner-grow spinner-grow-sm text-success" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                            <div class="spinner-grow spinner-grow-sm text-success" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                            <div class="spinner-grow spinner-grow-sm text-success" role="status">
-                                <span class="sr-only">Loading...</span>
+    <div id="content-full">
+        <div id="controls-frame">
+            <div id="title-frame">Control Kernel Server</div>
+            <div class="btn-group" role="group" aria-label="controls">
+                <button id="btn-minimizade" type="button" class="btn btn-light">
+                    <img src="../node_modules/bootstrap-icons/icons/dash.svg" />
+                </button>
+                <button id="btn-close" type="button" class="btn btn-light">
+                    <img src="../node_modules/bootstrap-icons/icons/x.svg" />
+                </button>
+            </div>
+        </div>
+        <div id="content-qr">
+            <br />
+            <p>Con tu dispositivo escanea el QR</p>
+            <canvas id="qr_ip" width="500"></canvas>
+        </div>
+
+        <div id="content-device" class="container">
+            <div id="device-info" class="row">
+                <div class="col-12">
+                    <div class="card text-center text-white bg-dark border-dark">
+                        <div class="card-header">Dispositivo</div>
+                        <div class="card-body">
+                            <h5 id="txt-system" class="card-title">---</h5>
+                            <p id="txt-device" class="card-text">---</p>
+                            <img src="img/aplicacion.svg" width="30" alt="" />
+                            <br /><br />
+                            <span id="status-success" class="badge">Conexión establecida</span>
+                            <div id="connect-success">
+                                <div class="spinner-grow spinner-grow-sm text-success" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <div class="spinner-grow spinner-grow-sm text-success" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <div class="spinner-grow spinner-grow-sm text-success" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="wait-device" class="row">
-            <div class="col-12">
-                <div class="card text-center">
-                    <div class="card-header">
-                        Estado
-                    </div>
-                    <div class="card-body">
-                        <span class="badge badge-primary">Esperando conexión</span>
-                        <div>
-                            <div class="spinner-grow spinner-grow-sm text-primary" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                            <div class="spinner-grow spinner-grow-sm text-primary" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                            <div class="spinner-grow spinner-grow-sm text-primary" role="status">
-                                <span class="sr-only">Loading...</span>
+            <div id="wait-device" class="row">
+                <div class="col-12">
+                    <div class="card text-center text-white bg-dark border-dark" >
+                        <div class="card-header ">Estado</div>
+                        <div class="card-body">
+                            <span class="badge badge-danger">Esperando conexión</span>
+                            <div>
+                                <div class="spinner-grow spinner-grow-sm text-danger" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <div class="spinner-grow spinner-grow-sm text-danger" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <div class="spinner-grow spinner-grow-sm text-danger" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -73,27 +82,36 @@
         </div>
     </div>
     <script>
-        window.jQuery = window.$ = require('jquery')    
-        const remote = require('electron').remote   
-        $("#wait-device").hide()
-        $("#device-info").hide()        
+        window.jQuery = window.$ = require("jquery");
+        const remote = require("electron").remote;
+        $("#wait-device").hide();
+        $("#device-info").hide();
         const checkDevice = setInterval(() => {
-            if (remote.getGlobal('_system') != null && remote.getGlobal('_device')  != null) {
-                $("#txt-system").text(remote.getGlobal('_system'))
-                $("#txt-device").text(remote.getGlobal('_device'))
-                $("#wait-device").hide()
-                $("#device-info").show()
+            if (
+                remote.getGlobal("_system") != null &&
+                remote.getGlobal("_device") != null
+            ) {
+                $("#txt-system").text(remote.getGlobal("_system"));
+                $("#txt-device").text(remote.getGlobal("_device"));
+                $("#wait-device").hide();
+                $("#device-info").show();
             } else {
-                $("#device-info").hide()
-                $("#wait-device").show()
+                $("#device-info").hide();
+                $("#wait-device").show();
             }
-        }, 1000)
+        }, 1000);
+
+        $("#btn-minimizade").click(function () {
+            $(this).blur();
+            const min = require("electron").remote.getCurrentWindow().minimize();
+        });
+
+        $("#btn-close").click(function () {
+            const min = require("electron").remote.getCurrentWindow().close();
+        });
     </script>
     <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
     <script src="js/qr-generator.js"></script>
-
-
 </body>
-
 
 </html>
