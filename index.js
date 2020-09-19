@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, Tray } = require('electron')
+const { app, BrowserWindow, Menu, Tray, nativeImage } = require('electron')
 
 const express = require('express')
 const http = require('http')
@@ -7,6 +7,8 @@ const cors = require('cors')
 const appexpress = express()
 const server = http.createServer(appexpress)
 const socket = require('./socket/socket-app')
+const path = require('path')
+const iconPath = path.join(__dirname, 'logo.png');
 socket.initServer(server)
 
 
@@ -40,37 +42,39 @@ function createWindow() {
         },
         transparent: true,
         frame: false,
-        icon: 'logo.ico',
         center: true,
         maximizable: false
     })
     win.loadFile('./src/index.html')
     win.removeMenu()    
+    win.setIcon(nativeImage.createFromPath(iconPath))
     global._port = port
     global._host = host
+    
 }
 
 function createTray() {
-    let tray = new Tray('logo.ico')
+    let tray = new Tray(iconPath)
+
     const ctx = Menu.buildFromTemplate([
         { label: 'Ver conexión', type: 'normal' },
         { label: 'Reiniciar app', type: 'normal' },
         { type: 'separator' },
         { label: 'Cerrar todo', type: 'normal' }
-    ])
-    tray.setContextMenu(ctx)
+    ])    
     tray.setTitle("app server")
     tray.setToolTip("Ejecucion en segundo plano")
-    tray.setImage('logo.ico')
+    tray.setImage(nativeImage.createFromPath(iconPath))
     tray.displayBalloon({
         title: 'Hola mundo',
         content: 'Esto es el icono de segundo plano',
         iconType: 'info',
-        icon: 'logo.ico'
+        icon: iconPath
     })
+    tray.setContextMenu(ctx)
 }
 
-app.on('ready', () => {
+app.on('ready', function() {
     createWindow()
     createTray()
 })
