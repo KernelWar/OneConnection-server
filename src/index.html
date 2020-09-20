@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Mouse server</title>
+    <title>Control Kernel Server</title>
 
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
@@ -26,10 +26,16 @@
                 </button>
             </div>
         </div>
-        <div id="content-qr">
-            <br />
-            <p>Con tu dispositivo escanea el QR</p>
-            <canvas id="qr_ip" width="500"></canvas>
+        <div class="container">
+            <div id="content-data-connection" class="row">
+                <div id="content-qr" class="col-12">
+                    <br />
+                    <p>Con tu dispositivo escanea el QR</p>
+                    <canvas id="qr_ip" width="500"></canvas>
+                    <br>
+                    <span id="data-host-server" class="badge"></span>
+                </div>
+            </div>
         </div>
 
         <div id="content-device" class="container">
@@ -60,7 +66,7 @@
             </div>
             <div id="wait-device" class="row">
                 <div class="col-12">
-                    <div class="card text-center text-white bg-dark border-dark" >
+                    <div class="card text-center text-white bg-dark border-dark">
                         <div class="card-header ">Estado</div>
                         <div class="card-body">
                             <span class="badge badge-danger">Esperando conexión</span>
@@ -81,9 +87,47 @@
             </div>
         </div>
     </div>
+    <div id="btns-configuration">
+        <div class="btn-group">
+            <button type="button" class="btn dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+                <svg class="bi" width="16" height="16" fill="currentColor">
+                    <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#gear-fill" />
+                </svg>
+            </button>
+            <div class="dropdown-menu">
+                <a id="item-network" class="dropdown-item  btn-sm" href="#" data-toggle="modal"
+                    data-target="#interfaceNetworkModdal">Interfaz de red</a>
+                <a class="dropdown-item  btn-sm" href="#">Puerto</a>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="interfaceNetworkModdal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Seleccione interfaz de red</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="list-interface" class="list-group">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
+        const QRCode = require('qrcode');
+        const Mustache = require('mustache')
+        const os = require("os")
         window.jQuery = window.$ = require("jquery");
-        const remote = require("electron").remote;
+        const {remote, ipcRenderer} = require("electron");
+        generateQR()
+
         $("#wait-device").hide();
         $("#device-info").hide();
         const checkDevice = setInterval(() => {
@@ -101,17 +145,55 @@
             }
         }, 1000);
 
+        $("#item-network").click(function () {            
+            let interfaces = os.networkInterfaces()
+            $("#list-interface").html("")
+            for (const item in interfaces) {
+                if (interfaces.hasOwnProperty(item)) {
+                    const element = interfaces[item][1];
+                    element['name'] = item
+                    $("#list-interface").append(Mustache.render($("#templateNetworkInterface").html(), element))
+                }
+            }
+        })
         $("#btn-minimizade").click(function () {
             $(this).blur();
             const min = require("electron").remote.getCurrentWindow().minimize();
         });
 
         $("#btn-close").click(function () {
-            const min = require("electron").remote.getCurrentWindow().close();
+            //const min = require("electron").remote.getCurrentWindow().close();
+            const min = require("electron").remote.getCurrentWindow().hide();
         });
+        function setIPServer(newip){
+            ipcRenderer.send('setHost',newip)            
+            generateQR()
+            $('#interfaceNetworkModdal').modal('toggle')
+            ipcRenderer.send('resetSocketServer')
+        }
+
+        function generateQR(){
+            const canvas = document.getElementById('qr_ip')
+            const host = remote.getGlobal('_host')
+            const port = remote.getGlobal('_port')
+            $("#data-host-server").text((host+":"+port))
+            QRCode.toCanvas(canvas, (host + ":" + port), function(error) {
+                if (error) console.error('qr error: ',error)
+            })
+        }
     </script>
-    <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="js/qr-generator.js"></script>
+    <script id="templateNetworkInterface" type="text/template">
+        <a href="#" onclick="setIPServer('{{address}}')" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1">{{name}}</h5>
+              <small>{{family}}</small>
+            </div>
+            <p class="mb-1">{{address}}</p>
+            <small>{{netmask}}</small>
+          </a>
+    </script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
 </body>
 
 </html>

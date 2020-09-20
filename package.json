@@ -20,6 +20,7 @@
         "fs": "0.0.1-security",
         "ip": "^1.1.5",
         "jquery": "^3.5.1",
+        "mustache": "^4.0.1",
         "node-cmd": "^3.0.0",
         "node-disk-info": "^1.1.0",
         "os-utils": "0.0.14",

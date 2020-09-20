@@ -5,15 +5,16 @@ const http = require('http')
 const ip = require('ip')
 const cors = require('cors')
 const appexpress = express()
-const server = http.createServer(appexpress)
-const socket = require('./socket/socket-app')
+let server = http.createServer(appexpress)
+let socket = require('./socket/socket-app')
 const path = require('path')
 const iconPath = path.join(__dirname, 'logo.png');
 socket.initServer(server)
-
+const { ipcMain } = require("electron");
 
 var host = ip.address()
 var port = 8080
+
 appexpress.use(cors())
 appexpress.use(express.json())
 appexpress.set('port', port)
@@ -29,9 +30,30 @@ server.listen(appexpress.get('port'), appexpress.get('host'), () => {
 socket.listenInConnect()
 socket.listenInConnection()
 
+ipcMain.on("setHost", (event,newhost) => {
+    global._host = newhost;
+    appexpress.set('host', newhost)
+    host = newhost
+});
 
+ipcMain.on("resetSocketServer", (event) => {    
+    resetSocketServer()
+});
 
-function createWindow() {
+function resetSocketServer() {
+    socket.deleteSocketServer()
+    server.close()
+    server = http.createServer(appexpress)
+    socket.initServer(server) 
+    server.listen(appexpress.get('port'), appexpress.get('host'), () => {
+        console.log(`Reset: Server listening on ${host}:${port}`)
+    })  
+    socket.listenInConnect()
+    socket.listenInConnection()
+   
+}
+
+app.on('ready', () => {
     let win = new BrowserWindow({
         width: 360,
         height: 600,
@@ -39,6 +61,7 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true,
+            devTools: true
         },
         transparent: true,
         frame: false,
@@ -46,22 +69,41 @@ function createWindow() {
         maximizable: false
     })
     win.loadFile('./src/index.html')
-    win.removeMenu()    
+    win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
     global._port = port
     global._host = host
-    
-}
-
-function createTray() {
     let tray = new Tray(iconPath)
 
     const ctx = Menu.buildFromTemplate([
-        { label: 'Ver conexión', type: 'normal' },
-        { label: 'Reiniciar app', type: 'normal' },
+        {
+            label: 'Ver conexión',
+            type: 'normal',
+            click: () => {
+                win.show()
+            }
+        },
+        {
+            label: 'Reiniciar app',
+            type: 'normal',
+            click: () => {
+                resetSocketServer()
+                app.relaunch()
+                app.quit()
+
+            }
+        },
         { type: 'separator' },
-        { label: 'Cerrar todo', type: 'normal' }
-    ])    
+        {
+            label: 'Cerrar todo',
+            type: 'normal',
+            click: () => {
+                server.close()
+                app.exit()
+            }
+        }
+    ])
+    /*
     tray.setTitle("app server")
     tray.setToolTip("Ejecucion en segundo plano")
     tray.setImage(nativeImage.createFromPath(iconPath))
@@ -71,10 +113,6 @@ function createTray() {
         iconType: 'info',
         icon: iconPath
     })
+*/
     tray.setContextMenu(ctx)
-}
-
-app.on('ready', function() {
-    createWindow()
-    createTray()
 })

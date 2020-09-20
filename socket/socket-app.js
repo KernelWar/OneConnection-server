@@ -9,20 +9,34 @@ const session = require("../api-win/session-win")
 const os = require('os')
 const os_utils = require('os-utils');    
 let io = null
+//Monitores
+let checkConnected = null
+let updateData = null
+let cpuMonitor = null
 function initServer(server) {
     io = socket(server)
-    
-    const checkConnected = setInterval(() => {
+    if(io){
+        console.log("socket inicializado")
+    }else{
+        console.log("socket no inicializado")
+    }
+    checkConnected = setInterval(() => {
         if (clientConnected() == false) {
             global._system = null
             global._device = null
         }
     }, 1000)
-    const updateData = setInterval(() => {
+    updateData = setInterval(() => {
         dataInit()
     }, (60000 * 5))    
 }
 
+function deleteSocketServer(){
+    clearInterval(checkConnected)
+    clearInterval(updateData)
+    clearInterval(cpuMonitor)
+    io = null
+}
 
 function listenInConnect() {
     io.on('connect', () => {
@@ -137,7 +151,7 @@ function listenSesionModule(socket){
         })
     })
 
-    setInterval(() => {  
+    cpuMonitor = setInterval(() => {  
         /*  
         os_utils.cpuFree(function(f){
             let free = parseInt(f*100)
@@ -216,10 +230,15 @@ function sendUserName() {
 }
 
 function clientConnected() {
-    let clients = io.engine.clientsCount
-    if (clients != 0) {
-        return true
-    }
+    let clients = null
+    try {
+        clients = io.engine.clientsCount    
+        if (clients != 0) {
+            return true
+        }
+    } catch (error) {
+        return false
+    }   
     return false
 }
 
@@ -229,4 +248,4 @@ function getTimeNow(){
     let time = "["+date.getHours() +":"+date.getMinutes()+":"+date.getSeconds()+"]"
     return time
 }
-module.exports = { initServer, listenInConnect, listenInConnection }
+module.exports = { initServer, listenInConnect, listenInConnection,deleteSocketServer }
