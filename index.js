@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, Tray, nativeImage } = require('electron')
+const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } = require('electron')
 
 const express = require('express')
 const http = require('http')
@@ -8,27 +8,50 @@ const appexpress = express()
 let server = http.createServer(appexpress)
 let socket = require('./socket/socket-app')
 const path = require('path')
+const fs = require('fs')
+
 const iconPath = path.join(__dirname, 'logo.png');
 socket.initServer(server)
-const { ipcMain } = require("electron");
 
 var host = ip.address()
 var port = 8080
+let win
 
-appexpress.use(cors())
-appexpress.use(express.json())
-appexpress.set('port', port)
-appexpress.set('host', host)
+fs.readFile('configServer.json',function (err, data){
+    if(err){
+        console.log(err)
+    }else{ 
+        if(data.isNull() == false){
+            let jsonData = JSON.parse(data)
+            host = jsonData['host']
+            port = jsonData['port']
+           
+           
+        }else{
+            host = ip.address()
+            port = 8080
+        }
+                     
+        appexpress.use(cors())
+        appexpress.use(express.json())
+        appexpress.set('port', port)
+        appexpress.set('host', host)
+                
+        global._port = port
+        global._host = host
+        appexpress.get('/', (req, res) => {
+            res.send("API funcionando !!")
+        })
+        server.listen(appexpress.get('port'), appexpress.get('host'), () => {
+            console.log(`Server listening on ${host}:${port}`)
+        })
 
-appexpress.get('/', (req, res) => {
-    res.send("API funcionando !!")
+        socket.listenInConnect()
+        socket.listenInConnection()
+    }
 })
-server.listen(appexpress.get('port'), appexpress.get('host'), () => {
-    console.log(`Server listening on ${host}:${port}`)
-})
 
-socket.listenInConnect()
-socket.listenInConnection()
+
 
 ipcMain.on("setHost", (event,newhost) => {
     global._host = newhost;
@@ -36,9 +59,29 @@ ipcMain.on("setHost", (event,newhost) => {
     host = newhost
 });
 
-ipcMain.on("resetSocketServer", (event) => {    
-    resetSocketServer()
+ipcMain.on("setPort", (event,newport) => {
+    global._port = newport;
+    appexpress.set('port', newport)
+    port = newport
 });
+
+ipcMain.on("resetSocketServer", (event) => {  
+    writeFileServerConfiguration()  
+    resetSocketServer()        
+});
+
+function writeFileServerConfiguration(){
+    let data = {
+        host,
+        port
+    }
+    fs.writeFile('configServer.json', JSON.stringify(data), function(err){
+        if(err){
+            console.log(err)
+        }
+    })
+}
+
 
 function resetSocketServer() {
     socket.deleteSocketServer()
@@ -54,14 +97,14 @@ function resetSocketServer() {
 }
 
 app.on('ready', () => {
-    let win = new BrowserWindow({
+    win = new BrowserWindow({
         width: 360,
         height: 600,
         resizable: false,
         webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true,
-            devTools: true
+            //devTools: true
         },
         transparent: true,
         frame: false,
@@ -71,8 +114,7 @@ app.on('ready', () => {
     win.loadFile('./src/index.html')
     win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
-    global._port = port
-    global._host = host
+    
     let tray = new Tray(iconPath)
 
     const ctx = Menu.buildFromTemplate([

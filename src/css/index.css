@@ -81,6 +81,17 @@ html, body{
     padding: 0 !important;
     margin: 0 !important;
 }
-#btns-configuration svg{
+#btns-configuration button{
     color: white;
+}
+#btns-configuration svg{
+    margin-top: -2px;
+}
+.list-interface .group-network-1{
+    margin-top: -5px !important;
+    font-size: small;
+}
+#toast-port{
+    margin-left: 10px;
+    margin-right: 10px;
 }

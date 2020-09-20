@@ -90,15 +90,28 @@
     <div id="btns-configuration">
         <div class="btn-group">
             <button type="button" class="btn dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
+                aria-expanded="false">                
                 <svg class="bi" width="16" height="16" fill="currentColor">
                     <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#gear-fill" />
-                </svg>
+                </svg> Configuración
             </button>
             <div class="dropdown-menu">
                 <a id="item-network" class="dropdown-item  btn-sm" href="#" data-toggle="modal"
-                    data-target="#interfaceNetworkModdal">Interfaz de red</a>
-                <a class="dropdown-item  btn-sm" href="#">Puerto</a>
+                    data-target="#interfaceNetworkModdal">
+                    <svg class="bi" width="16" height="16" fill="currentColor">
+                        <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#diagram-2" />
+                    </svg>
+                    Interfaz de red</a>
+                <a id="item-port" class="dropdown-item  btn-sm" href="#" data-toggle="modal" data-target="#changePort">
+                    <svg class="bi" width="16" height="16" fill="currentColor">
+                        <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#hdd-network" />
+                    </svg>
+                    Puerto</a>
+                <a class="dropdown-item  btn-sm" href="#">
+                    <svg class="bi" width="16" height="16" fill="currentColor">
+                        <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#cloud-check" />
+                    </svg>
+                    Buscar actualizaciones</a>
             </div>
         </div>
     </div>
@@ -120,12 +133,61 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="changePort" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Puerto</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <svg class="bi" width="16" height="16" fill="currentColor">
+                                            <use
+                                                xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#hdd-network" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <input id="port-server" title="Debes ingresar un número de puerto" pattern="/^([0-9])*$/" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <button id="btnSetPort" type="button"
+                                class="btn btn-outline-primary btn-sm">Guardar</button>
+                        </div>
+                    </form><br>
+                    
+                </div>
+            </div>
+        </div>
+        <div id="toast-port" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="mr-auto">Atención</strong>
+            </div>
+            <div class="toast-body">
+                El puerto no es valido
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.jQuery = window.$ = require("jquery");
+    </script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const QRCode = require('qrcode');
         const Mustache = require('mustache')
         const os = require("os")
-        window.jQuery = window.$ = require("jquery");
-        const {remote, ipcRenderer} = require("electron");
+
+        const { remote, ipcRenderer } = require("electron");
         generateQR()
 
         $("#wait-device").hide();
@@ -145,55 +207,79 @@
             }
         }, 1000);
 
-        $("#item-network").click(function () {            
+        $("#item-network").click(function () {
             let interfaces = os.networkInterfaces()
             $("#list-interface").html("")
             for (const item in interfaces) {
                 if (interfaces.hasOwnProperty(item)) {
                     const element = interfaces[item][1];
-                    element['name'] = item
-                    $("#list-interface").append(Mustache.render($("#templateNetworkInterface").html(), element))
+                    if (element['address'] != "127.0.0.1") {
+                        element['name'] = item
+                        $("#list-interface").append(Mustache.render($("#templateNetworkInterface").html(), element))
+                    }
                 }
             }
         })
         $("#btn-minimizade").click(function () {
             $(this).blur();
-            const min = require("electron").remote.getCurrentWindow().minimize();
+            const min = remote.getCurrentWindow().minimize();
         });
 
         $("#btn-close").click(function () {
             //const min = require("electron").remote.getCurrentWindow().close();
-            const min = require("electron").remote.getCurrentWindow().hide();
+            const min = remote.getCurrentWindow().hide();
         });
-        function setIPServer(newip){
-            ipcRenderer.send('setHost',newip)            
+
+        $("#item-port").click(function () {
+            $("#port-server").val(remote.getGlobal('_port'))
+        })
+
+        $("#btnSetPort").click(function () {
+            let newPort = $("#port-server").val()
+            newPort = parseInt(newPort)
+            if (newPort >= 0) {
+                ipcRenderer.send('setPort', newPort)
+                generateQR()
+                ipcRenderer.send('resetSocketServer')
+                $('#changePort').modal('toggle')
+            } else {
+                $("#toast-port").toast({
+                    delay: 4000,
+                    autohide: true
+                })
+                $("#toast-port").toast("show")
+            }
+        })
+
+        function setIPServer(newip) {
+            ipcRenderer.send('setHost', newip)
             generateQR()
             $('#interfaceNetworkModdal').modal('toggle')
             ipcRenderer.send('resetSocketServer')
         }
 
-        function generateQR(){
+        function generateQR() {
             const canvas = document.getElementById('qr_ip')
             const host = remote.getGlobal('_host')
             const port = remote.getGlobal('_port')
-            $("#data-host-server").text((host+":"+port))
-            QRCode.toCanvas(canvas, (host + ":" + port), function(error) {
-                if (error) console.error('qr error: ',error)
+            $("#data-host-server").text((host + ":" + port))
+            QRCode.toCanvas(canvas, (host + ":" + port), function (error) {
+                if (error) console.error('qr error: ', error)
             })
         }
     </script>
     <script id="templateNetworkInterface" type="text/template">
-        <a href="#" onclick="setIPServer('{{address}}')" class="list-group-item list-group-item-action">
+        <a href="#" onclick="setIPServer('{{address}}')" class="list-interface  list-group-item list-group-item-action">
             <div class="d-flex w-100 justify-content-between">
               <h5 class="mb-1">{{name}}</h5>
               <small>{{family}}</small>
             </div>
-            <p class="mb-1">{{address}}</p>
-            <small>{{netmask}}</small>
+            <div>{{address}}</div>
+            <div class="group-network-1">{{netmask}}</div>
           </a>
     </script>
-    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    
+
+
 </body>
 
 </html>
