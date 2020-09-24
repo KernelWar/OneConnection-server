@@ -3,6 +3,20 @@ html, body{
     width: 100%;
     background: #00000e;
 }
+#btn-delete-device{
+    font-weight: bold;
+}
+#header-card{
+    display: inline-flex;
+}
+#title-header-card{
+    width: 80%;
+    font-size: 14px;
+    text-align: left;
+    margin-top: auto;
+    margin-bottom: auto;
+    vertical-align: middle;
+}
 #content-full{    
     background-image: url("../img/fondo.jpg"), linear-gradient(to bottom, rgba(0, 4, 26, 0) 60%, rgba(0, 0, 18, 0.966) 100%) !important;
     background-repeat: no-repeat;
@@ -44,22 +58,54 @@ html, body{
     margin-top: -8px;
 }
 
+#content-data-connection{
+    background: #ff003c;
+}
+
 #content-qr {
     font-weight: normal;
     text-align: center;
     padding: 0;    
     padding-bottom: 60px;
     color: white;
-    background: #ff003c;
 }
 
 #content-qr canvas {
     margin: 0;
     box-shadow: 0px 0px 26px 0px rgba(0,0,0,0.35);
 }
+#data-host-server{
+    background: rgb(55, 0, 156);
+}
 #content-device{
     margin-top: -35px;
 }
 #status-success{
     background: rgb(0, 192, 58);
+}
+
+#btns-configuration{
+    position: absolute;
+    bottom: 0;    
+    padding: 5px;
+    width: 100%;
+    
+}
+#btns-configuration .btn-group{
+    padding: 0 !important;
+    margin: 0 !important;
+}
+#btns-configuration button{
+    color: white;
+}
+#btns-configuration svg{
+    margin-top: -2px;
+}
+.list-interface .group-network-1{
+    margin-top: -5px !important;
+    font-size: small;
+}
+#toast-port{
+    margin-left: 10px;
+    margin-right: 10px;
 }
