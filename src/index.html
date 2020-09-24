@@ -42,12 +42,21 @@
             <div id="device-info" class="row">
                 <div class="col-12">
                     <div class="card text-center text-white bg-dark border-dark">
-                        <div class="card-header">Dispositivo</div>
+                        <div id="header-card" class="card-header">
+                            <div id="title-header-card">Dispositivo</div>
+                            <button id="btn-delete-device" type="button"
+                                class="btn btn-outline-danger btn-sm">Eliminar</button>
+                        </div>
                         <div class="card-body">
-                            <h5 id="txt-system" class="card-title">---</h5>
-                            <p id="txt-device" class="card-text">---</p>
+                            <h5 id="txt-device" class="card-title">---</h5>
+                            <p id="txt-system" class="card-text">---</p>
                             <img src="img/aplicacion.svg" width="30" alt="" />
-                            <br /><br />
+                            <div class="form-check col-form-label-sm">
+                                <input class="form-check-input" type="checkbox" value="" id="fixConnection">
+                                <label class="form-check-label " for="fixConnection">
+                                    Fijar conexión
+                                </label>
+                            </div>
                             <span id="status-success" class="badge">Conexión establecida</span>
                             <div id="connect-success">
                                 <div class="spinner-grow spinner-grow-sm text-success" role="status">
@@ -90,7 +99,7 @@
     <div id="btns-configuration">
         <div class="btn-group">
             <button type="button" class="btn dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">                
+                aria-expanded="false">
                 <svg class="bi" width="16" height="16" fill="currentColor">
                     <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#gear-fill" />
                 </svg> Configuración
@@ -156,7 +165,8 @@
                                         </svg>
                                     </div>
                                 </div>
-                                <input id="port-server" title="Debes ingresar un número de puerto" pattern="/^([0-9])*$/" class="form-control" type="text">
+                                <input id="port-server" title="Debes ingresar un número de puerto"
+                                    pattern="/^([0-9])*$/" class="form-control" type="text">
                             </div>
                         </div>
                         <div class="text-right">
@@ -164,7 +174,7 @@
                                 class="btn btn-outline-primary btn-sm">Guardar</button>
                         </div>
                     </form><br>
-                    
+
                 </div>
             </div>
         </div>
@@ -189,10 +199,12 @@
 
         const { remote, ipcRenderer } = require("electron");
         generateQR()
-
         $("#wait-device").hide();
         $("#device-info").hide();
         const checkDevice = setInterval(() => {
+            if (remote.getGlobal("_fix") == true) {
+                $("#fixConnection").prop('checked', true);
+            }
             if (
                 remote.getGlobal("_system") != null &&
                 remote.getGlobal("_device") != null
@@ -248,6 +260,19 @@
                     autohide: true
                 })
                 $("#toast-port").toast("show")
+            }
+        })
+
+        $("#btn-delete-device").click(function () {
+            ipcRenderer.send('desconectClient')
+        })
+
+        $("#fixConnection").change(function () {
+            var status = $("#fixConnection").is(':checked')
+            if (status) {
+                ipcRenderer.send("fixConnection")
+            } else {
+                ipcRenderer.send("removefixConnection")
             }
         })
 

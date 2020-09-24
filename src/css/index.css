@@ -3,6 +3,20 @@ html, body{
     width: 100%;
     background: #00000e;
 }
+#btn-delete-device{
+    font-weight: bold;
+}
+#header-card{
+    display: inline-flex;
+}
+#title-header-card{
+    width: 80%;
+    font-size: 14px;
+    text-align: left;
+    margin-top: auto;
+    margin-bottom: auto;
+    vertical-align: middle;
+}
 #content-full{    
     background-image: url("../img/fondo.jpg"), linear-gradient(to bottom, rgba(0, 4, 26, 0) 60%, rgba(0, 0, 18, 0.966) 100%) !important;
     background-repeat: no-repeat;
