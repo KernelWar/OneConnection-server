@@ -20,7 +20,7 @@ var host = ip.address()
 var port = 8080
 let win
 
-fs.readFile('configServer.json',function (err, data){
+fs.readFile('config/configServer.json',function (err, data){
     if(err){
         console.log(err)
     }else{ 
@@ -98,7 +98,7 @@ ipcMain.on("fixConnection", (event)=>{
         device: global._device,
         uuid: global._uuid
     }
-    fs.writeFile('fixDevice.json', JSON.stringify(data), function(err){
+    fs.writeFile('config/fixDevice.json', JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
@@ -115,7 +115,7 @@ function deleteDeviceFixed(){
         device: '',
         uuid: ''
     }
-    fs.writeFile('fixDevice.json', JSON.stringify(data), function(err){
+    fs.writeFile('config/fixDevice.json', JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
@@ -140,7 +140,7 @@ function writeFileServerConfiguration(){
         host,
         port
     }
-    fs.writeFile('configServer.json', JSON.stringify(data), function(err){
+    fs.writeFile('config/configServer.json', JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
