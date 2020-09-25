@@ -169,7 +169,6 @@ app.on('ready', () => {
         webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true,
-            
         },
         transparent: true,
         frame: false,
@@ -179,7 +178,7 @@ app.on('ready', () => {
     win.loadFile('./src/index.html')
     win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
-   // win.webContents.openDevTools()
+// win.webContents.openDevTools()
     let tray = new Tray(iconPath)
 
     const ctx = Menu.buildFromTemplate([
