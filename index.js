@@ -20,7 +20,7 @@ var host = ip.address()
 var port = 8080
 let win
 
-fs.readFile('config/configServer.json',function (err, data){
+fs.readFile((path.join(__dirname, 'config/configServer.json')),function (err, data){
     if(err){
         console.log(err)
     }else{ 
@@ -98,7 +98,7 @@ ipcMain.on("fixConnection", (event)=>{
         device: global._device,
         uuid: global._uuid
     }
-    fs.writeFile('config/fixDevice.json', JSON.stringify(data), function(err){
+    fs.writeFile((path.join(__dirname, 'config/fixDevice.json')), JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
@@ -115,7 +115,7 @@ function deleteDeviceFixed(){
         device: '',
         uuid: ''
     }
-    fs.writeFile('config/fixDevice.json', JSON.stringify(data), function(err){
+    fs.writeFile((path.join(__dirname, 'config/fixDevice.json')), JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
@@ -140,7 +140,7 @@ function writeFileServerConfiguration(){
         host,
         port
     }
-    fs.writeFile('config/configServer.json', JSON.stringify(data), function(err){
+    fs.writeFile((path.join(__dirname, 'config/configServer.json')), JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
@@ -169,6 +169,7 @@ app.on('ready', () => {
         webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true,
+            devTools: true
         },
         transparent: true,
         frame: false,
@@ -178,7 +179,7 @@ app.on('ready', () => {
     win.loadFile('./src/index.html')
     win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
-// win.webContents.openDevTools()
+    win.webContents.openDevTools()
     let tray = new Tray(iconPath)
 
     const ctx = Menu.buildFromTemplate([
