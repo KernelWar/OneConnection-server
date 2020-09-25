@@ -11,5 +11,3 @@ $RECYCLE.BIN/
 
 /dist
 /node_modules
-configServer.json
-fixDevice.json
