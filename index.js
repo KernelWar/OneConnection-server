@@ -11,6 +11,9 @@ const path = require('path')
 const fs = require('fs')
 const iconPath = path.join(__dirname, 'logo.png');
 
+
+
+
 //server.maxConnections = 1
 //server.setMaxListeners = 2
 
@@ -23,6 +26,7 @@ let win
 fs.readFile((path.join(__dirname, 'config/configServer.json')),function (err, data){
     if(err){
         console.log(err)
+        
     }else{ 
         if(data.isNull() == false){
             let jsonData = JSON.parse(data)
@@ -98,7 +102,7 @@ ipcMain.on("fixConnection", (event)=>{
         device: global._device,
         uuid: global._uuid
     }
-    fs.writeFile((path.join(__dirname, 'config/fixDevice.json')), JSON.stringify(data), function(err){
+    fs.writeFileSync((path.join(__dirname, 'config/fixDevice.json')), JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
@@ -115,7 +119,7 @@ function deleteDeviceFixed(){
         device: '',
         uuid: ''
     }
-    fs.writeFile((path.join(__dirname, 'config/fixDevice.json')), JSON.stringify(data), function(err){
+    fs.writeFileSync((path.join(__dirname, 'config/fixDevice.json')), JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
@@ -140,7 +144,7 @@ function writeFileServerConfiguration(){
         host,
         port
     }
-    fs.writeFile((path.join(__dirname, 'config/configServer.json')), JSON.stringify(data), function(err){
+    fs.writeFileSync((path.join(__dirname, 'config/configServer.json')), JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
@@ -169,7 +173,7 @@ app.on('ready', () => {
         webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true,
-            devTools: true
+            devTools: false
         },
         transparent: true,
         frame: false,
@@ -179,7 +183,7 @@ app.on('ready', () => {
     win.loadFile('./src/index.html')
     win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
-    win.webContents.openDevTools()
+    //win.webContents.openDevTools()
     let tray = new Tray(iconPath)
 
     const ctx = Menu.buildFromTemplate([

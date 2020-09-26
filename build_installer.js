@@ -13,7 +13,7 @@ const msiCreator = new MSICreator({
     name: 'Control Kernel Server',
     manufacturer: 'KernelWar',
     version: '1.0.0',
-
+    appIconPath: 'logo.ico',
     ui: {
         chooseDirectory: true
     },

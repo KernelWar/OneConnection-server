@@ -6,13 +6,14 @@
   "scripts": {
     "start": "electromon .",
     "start-e": "electron .",
-    "package": "electron-packager . --platform=win32 --arch=x64 outexe",
+    "package": "electron-packager . --platform=win32 --arch=x64 outexe --asar",
     "make": "electron-forge make",
     "dist": "electron-builder"
   },
   "author": "KernelWar",
   "license": "ISC",
   "build": {
+    "asar": true,
     "productName": "Control Kernel Server",
     "win": {
       "icon": "logo.png",
@@ -32,10 +33,11 @@
       "perMachine": true
     }
   },
-  "config": {
+  "config": {    
     "forge": {
       "packagerConfig": {
-        "icon": "logo.ico"
+        "icon": "logo.ico",
+        "asar": true
       },
       "makers": [
         {
@@ -66,7 +68,6 @@
     "mustache": "^4.0.1",
     "node-cmd": "^3.0.0",
     "node-disk-info": "^1.1.0",
-    "npm-merge-driver": "^2.3.6",
     "os-utils": "0.0.14",
     "qrcode": "^1.4.4",
     "ref-napi": "^2.1.2",
@@ -80,7 +81,9 @@
     "electromon": "^1.0.10",
     "electron": "^9.3.1",
     "electron-builder": "^22.8.1",
+    "electron-builder-squirrel-windows": "^22.9.1",
     "electron-rebuild": "^1.11.0",
-    "electron-wix-msi": "^3.0.2"
+    "electron-wix-msi": "^3.0.2",
+    "npm-merge-driver": "^2.3.6"
   }
 }

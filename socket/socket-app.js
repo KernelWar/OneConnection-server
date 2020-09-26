@@ -8,12 +8,16 @@ const shorcutsMedia = require("../api-win/shortcuts-media-win");
 const session = require("../api-win/session-win")
 const os = require('os')
 const fs = require('fs')
+const path = require('path')
 const os_utils = require('os-utils');
 let io = null
 //Monitores
 let checkConnected = null
 let updateData = null
 let cpuMonitor = null
+
+
+
 function initServer(server) {
     io = socket(server)
     if (io) {
@@ -41,7 +45,7 @@ function deleteSocketServer() {
 
 function listenInConnect() {
     io.on('connect', (socket) => {
-        console.log('cliente conectado ',socket.id)
+        console.log('cliente conectado ', socket.id)
         //console.log('client -> ',socket)
         dataInit()
 
@@ -176,47 +180,47 @@ function listenSesionModule(socket) {
         });
     }, 1000);
 }
+
+function loadDevice(device) {
+    let data = fs.readFileSync((path.join(__dirname, '../config/fixDevice.json')))
+    //Si hay conexion fija
+    if (data.isNull() == false) {
+        let dData = JSON.parse(data)
+        //Si los datos del dispositivo a conectar son iguales
+        //al dispositivo fijado se realiza la conexion
+        //console.log("load -> ", dData)
+        //console.log("request -> ",device)
+        if (dData['uuid'] == device.uuid) {
+            global._system = device.system
+            global._device = device.device
+            global._uuid = device.uuid
+            global._fix = true
+            console.log("Hay connexión fija")
+        } else {
+            //Si es un dispositivo desconocido se niega la conexion
+            //    socket.to(socket.id).emit("desconectDevice")
+            // console.log("Intento de conexión denegada -> ",device.uuid) 
+            if (dData['uuid'].length != 0) {
+                console.log("conexion denegada -> [", dData['uuid'], "] -> ", dData['uuid'].length)
+                socket.emit("desconectDevice")
+            } else {
+                console.log("No hay conexion dija")
+                global._system = device.system
+                global._device = device.device
+                global._uuid = device.uuid
+                global._fix = false
+            }
+        }
+    } else {
+        console.log("fix null")
+    }
+}
+
 function listenInConnection() {
     io.on("connection", socket => {
         socket.on("onDevice", (device) => {
             console.log("onDevice: ", device)
-            fs.readFile('fixDevice.json',function (err, data){
-                if(err){
-                    console.log(err)
-                }else{
-                    //Si hay conexion fija
-                    if(data.isNull() == false){
-                        let dData = JSON.parse(data)
-                        //Si los datos del dispositivo a conectar son iguales
-                        //al dispositivo fijado se realiza la conexion
-                        //console.log("load -> ", dData)
-                        //console.log("request -> ",device)
-                        if(dData['uuid'] == device.uuid){
-                            global._system = device.system
-                            global._device = device.device
-                            global._uuid = device.uuid   
-                            global._fix = true
-                            console.log("Hay connexión fija") 
-                        }else{                            
-                        //Si es un dispositivo desconocido se niega la conexion
-                        //    socket.to(socket.id).emit("desconectDevice")
-                        // console.log("Intento de conexión denegada -> ",device.uuid) 
-                            if(dData['uuid'].length != 0){
-                                console.log("conexion denegada -> [",dData['uuid'],"] -> ", dData['uuid'].length)
-                                socket.emit("desconectDevice")
-                            }else{
-                                console.log("No hay conexion dija")
-                                global._system = device.system
-                                global._device = device.device
-                                global._uuid = device.uuid
-                                global._fix = false
-                            }
-                        }
-                    }else{
-                        console.log("fix null")
-                    }
-                }
-            })
+            loadDevice(device)
         })
 
         socket.on("setBrightness", (value) => {
@@ -236,7 +240,7 @@ function listenInConnection() {
     });
 
 }
-function desconectedClient(){
+function desconectedClient() {
     io.emit("desconectDevice")
 }
 function dataInit() {
@@ -290,4 +294,4 @@ function getTimeNow() {
     let time = "[" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]"
     return time
 }
-module.exports = { initServer, listenInConnect, listenInConnection, deleteSocketServer, clientConnected, getTimeNow, desconectedClient}
+module.exports = { initServer, listenInConnect, listenInConnection, deleteSocketServer, clientConnected, getTimeNow, desconectedClient }
