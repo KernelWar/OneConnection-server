@@ -23,7 +23,13 @@ var host = ip.address()
 var port = 8080
 let win
 
-fs.readFile((path.join(__dirname, 'config/configServer.json')),function (err, data){
+let pathConfigServer = (path.join(__dirname, 'config/configServer.json'))
+let pathConfigFixDevice = (path.join(__dirname, 'config/fixDevice.json'))
+
+//let pathConfigServer = 'config/configServer.json'
+//let pathConfigFixDevice = 'config/fixDevice.json'
+
+fs.readFile(pathConfigServer,function (err, data){
     if(err){
         console.log(err)
         
@@ -102,7 +108,7 @@ ipcMain.on("fixConnection", (event)=>{
         device: global._device,
         uuid: global._uuid
     }
-    fs.writeFileSync((path.join(__dirname, 'config/fixDevice.json')), JSON.stringify(data), function(err){
+    fs.writeFileSync(pathConfigFixDevice, JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
@@ -119,7 +125,7 @@ function deleteDeviceFixed(){
         device: '',
         uuid: ''
     }
-    fs.writeFileSync((path.join(__dirname, 'config/fixDevice.json')), JSON.stringify(data), function(err){
+    fs.writeFileSync(pathConfigFixDevice, JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
@@ -144,7 +150,7 @@ function writeFileServerConfiguration(){
         host,
         port
     }
-    fs.writeFileSync((path.join(__dirname, 'config/configServer.json')), JSON.stringify(data), function(err){
+    fs.writeFileSync(pathConfigServer, JSON.stringify(data), function(err){
         if(err){
             console.log(err)
         }
