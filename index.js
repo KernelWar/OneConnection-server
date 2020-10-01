@@ -1,5 +1,5 @@
 const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } = require('electron')
-
+const gCONFIG = require('./config.js')
 const express = require('express')
 const http = require('http')
 const ip = require('ip')
@@ -13,7 +13,7 @@ let socket = require('./socket/socket-app')
 
 //console.log(process.env.ELECTRON_ENABLE_LOGGING)
 //process.env.NODE_ENV = "production"
-
+console.log(gCONFIG.NODE_ENV)
 const iconPath = path.join(__dirname, '/logo.png')
 //server.maxConnections = 1
 //server.setMaxListeners = 2
@@ -26,7 +26,7 @@ let win
 let pathConfigServer
 let pathConfigFixDevice
 
-if(process.env.NODE_ENV == 'production'){
+if( gCONFIG.NODE_ENV == 'production'){
     addLog('PRODUCTION')
     console.log("----PRODUCTION-----")
     global._pathApp = process.resourcesPath+"/app.asar.unpacked"
