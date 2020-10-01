@@ -58,9 +58,6 @@ const MOUSEEVENTF_WHEEL = 0x0800
 const SPEEDMOUSE = getSpeedMouse()
 
 
-timeFastTouch = 100
-timeSlowTouch = 0
-
 function moveScrollDown() {
     user32.mouse_event(MOUSEEVENTF_WHEEL, 0, 0, -20, 0);
 }
@@ -153,7 +150,7 @@ function setSpeedMouse(speed) {
 
 function getSpeedMouse() {
     var getSpeed = new Buffer(4)
-    var data = user32.SystemParametersInfoA(SPI_GETMOUSESPEED, 0, getSpeed, 0);
+    user32.SystemParametersInfoA(SPI_GETMOUSESPEED, 0, getSpeed, 0);
     getSpeed.type = ref.types.int
     //console.log("speed: ", getSpeed.deref())
     return getSpeed.deref()

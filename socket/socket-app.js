@@ -3,7 +3,7 @@ const mouse = require("../api-win/mouse-win")
 const volume = require("win-audio").speaker
 const nircmd = require('nircmd')
 const WmiClient = require('wmi-client')
-const battery = require("../api-win/battery-win")
+const battery = require('battery-level')
 const directories = require("../api-win/directories-win")
 const shorcutsMedia = require("../api-win/shortcuts-media-win")
 const session = require("../api-win/session-win")
@@ -268,9 +268,7 @@ function dataInit() {
                 //console.log(level)
             }
         })
-
-        battery.getBatteryLevel().then((level) => {
-            //console.log("battery: ",level)
+        battery().then((level) =>{            
             if (level) {
                 io.emit("onBattery", (level * 100))
             } else {
@@ -283,6 +281,7 @@ function dataInit() {
         console.log("status-connection -> waiting " + getTimeNow())
     }
 }
+
 
 
 function sendUserName() {
