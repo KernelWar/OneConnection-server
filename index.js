@@ -4,16 +4,17 @@ const express = require('express')
 const http = require('http')
 const ip = require('ip')
 const cors = require('cors')
+const fs = require('fs')
+
+const path = require('path')
 const appexpress = express()
 let server = http.createServer(appexpress)
 let socket = require('./socket/socket-app')
-const path = require('path')
-const fs = require('fs')
-const iconPath = path.join(__dirname, 'logo.png');
 
+//console.log(process.env.ELECTRON_ENABLE_LOGGING)
+process.env.NODE_ENV = "production"
 
-
-
+const iconPath = path.join(__dirname, '/logo.png')
 //server.maxConnections = 1
 //server.setMaxListeners = 2
 
@@ -22,17 +23,28 @@ socket.initServer(server)
 var host = ip.address()
 var port = 8080
 let win
+let pathConfigServer
+let pathConfigFixDevice
 
-let pathConfigServer = (path.join(__dirname, 'config/configServer.json'))
-let pathConfigFixDevice = (path.join(__dirname, 'config/fixDevice.json'))
+if(process.env.NODE_ENV == 'production'){
+    addLog('PRODUCTION')
+    console.log("----PRODUCTION-----")
+    global._pathApp = process.resourcesPath+"/app.asar.unpacked"
+    pathConfigServer = global._pathApp+"/config/configServer.json"
+    pathConfigFixDevice = global._pathApp+"/config/fixDevice.json"
+}else{
+    addLog('DEVELOPMENT')
+    console.log("----DEVELOPMENT-----")
+    global._pathApp = __dirname
+    pathConfigServer = (path.join(__dirname, 'config/configServer.json'))
+    pathConfigFixDevice = (path.join(__dirname, 'config/fixDevice.json'))
+}
 
-//let pathConfigServer = 'config/configServer.json'
-//let pathConfigFixDevice = 'config/fixDevice.json'
 
 fs.readFile(pathConfigServer,function (err, data){
     if(err){
         console.log(err)
-        
+        addLog(err)
     }else{ 
         if(data.isNull() == false){
             let jsonData = JSON.parse(data)
@@ -81,6 +93,11 @@ fs.readFile(pathConfigServer,function (err, data){
     }
 })
 
+function addLog(data){
+    //dialog.showMessageBox({title: 'hola',message:data})
+    data = "\n\n"+data
+    fs.appendFileSync('C:/Users/Jose/Desktop/config/logs.txt',data, { encoding: "utf8", flag: "w" } )
+}
 
 
 
@@ -111,6 +128,7 @@ ipcMain.on("fixConnection", (event)=>{
     fs.writeFileSync(pathConfigFixDevice, JSON.stringify(data), function(err){
         if(err){
             console.log(err)
+            addLog(err)
         }
     })
 })
@@ -128,6 +146,7 @@ function deleteDeviceFixed(){
     fs.writeFileSync(pathConfigFixDevice, JSON.stringify(data), function(err){
         if(err){
             console.log(err)
+            addLog(err)
         }
     })
 }
@@ -153,6 +172,7 @@ function writeFileServerConfiguration(){
     fs.writeFileSync(pathConfigServer, JSON.stringify(data), function(err){
         if(err){
             console.log(err)
+            addLog(err)
         }
     })
 }
@@ -178,20 +198,21 @@ app.on('ready', () => {
         resizable: false,
         webPreferences: {
             nodeIntegration: true,
-            enableRemoteModule: true,
-            devTools: false
+            //nodeIntegrationInWorker: true,
+            enableRemoteModule: true
         },
         transparent: true,
         frame: false,
         center: true,
         maximizable: false
     })
-    win.loadFile('./src/index.html')
+    win.loadFile('src/index.html')
     win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
-    //win.webContents.openDevTools()
-    let tray = new Tray(iconPath)
+    win.webContents.openDevTools()
 
+    
+    let tray = new Tray(iconPath)
     const ctx = Menu.buildFromTemplate([
         {
             label: 'Ver conexión',
@@ -219,16 +240,5 @@ app.on('ready', () => {
             }
         }
     ])
-    /*
-    tray.setTitle("app server")
-    tray.setToolTip("Ejecucion en segundo plano")
-    tray.setImage(nativeImage.createFromPath(iconPath))
-    tray.displayBalloon({
-        title: 'Hola mundo',
-        content: 'Esto es el icono de segundo plano',
-        iconType: 'info',
-        icon: iconPath
-    })
-*/
     tray.setContextMenu(ctx)
 })

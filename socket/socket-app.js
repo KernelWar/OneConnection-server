@@ -1,22 +1,27 @@
 const socket = require('socket.io')
-const volume = require('../api-win/volume-win')
 const mouse = require("../api-win/mouse-win")
-const brightness = require("../api-win/brightness-win")
+const volume = require('../api-win/volume-win')
+const nircmd = require('nircmd')
+const WmiClient = require('wmi-client')
 const battery = require("../api-win/battery-win")
 const directories = require("../api-win/directories-win")
-const shorcutsMedia = require("../api-win/shortcuts-media-win");
+const shorcutsMedia = require("../api-win/shortcuts-media-win")
 const session = require("../api-win/session-win")
 const os = require('os')
 const fs = require('fs')
-const path = require('path')
 const os_utils = require('os-utils');
 let io = null
 //Monitores
 let checkConnected = null
 let updateData = null
 let cpuMonitor = null
+const path = require('path')
 
-
+let query = 'SELECT CurrentBrightness,InstanceName FROM WmiMonitorBrightness';
+let wmi = new WmiClient({
+    host: 'localhost',
+    namespace: '\\\\root\\WMI'
+})
 
 function initServer(server) {
     io = socket(server)
@@ -158,16 +163,6 @@ function listenSesionModule(socket) {
     })
 
     cpuMonitor = setInterval(() => {
-        /*  
-        os_utils.cpuFree(function(f){
-            let free = parseInt(f*100)
-            let cpu = {
-                free: (free)+"%",
-                used: 100-(free)+"%"
-            }
-            console.log(cpu)
-        })
-        */
         os_utils.cpuUsage(function (v) {
             let mdis = os_utils.freememPercentage() * 100
             let mUsed = 100 - mdis
@@ -181,8 +176,20 @@ function listenSesionModule(socket) {
     }, 1000);
 }
 
+function addLog(data){
+    data = "\n\n"+data
+    fs.appendFileSync('C:/Users/Jose/Desktop/config/logs.txt',data, { encoding: "utf8", flag: "w" } )
+}
+
 function loadDevice(device) {
-    let data = fs.readFileSync((path.join(__dirname, '../config/fixDevice.json')))
+    let data
+    let dir
+    if (process.env.NODE_ENV == 'production') {
+        dir = process.resourcesPath + "/app.asar.unpacked/config/fixDevice.json"
+    } else {
+        dir = (path.join(__dirname, '../config/fixDevice.json'))
+    }
+    data = fs.readFileSync(dir)
     //Si hay conexion fija
     if (data.isNull() == false) {
         let dData = JSON.parse(data)
@@ -222,12 +229,9 @@ function listenInConnection() {
             console.log("onDevice: ", device)
             loadDevice(device)
         })
-
         socket.on("setBrightness", (value) => {
-            let b = value / 100
-            brightness.setBrightness(b)
+            nircmd(['setbrightness', value]);
         })
-
         socket.on("getUserName", () => {
             sendUserName()
         })
@@ -249,9 +253,22 @@ function dataInit() {
         volume.getVolume().then((vol) => {
             io.emit("onVolume", vol)
         })
-
-        brightness.getBrightness().then((level) => {
-            io.emit("onBrightness", level)
+        //getBrightness
+        wmi.cwd = global._pathApp + "/node_modules/wmi-client"
+        addLog(global._pathApp)
+        wmi.query(query,function (err, res) {
+            if (err) {
+                console.log(err)
+            } else {
+                let level
+                if (!res.length) {
+                    level = 0
+                } else {
+                    level = res[0].CurrentBrightness / 100
+                }
+                io.emit("onBrightness", level)
+                //console.log(level)
+            }
         })
 
         battery.getBatteryLevel().then((level) => {
