@@ -12,7 +12,7 @@ let server = http.createServer(appexpress)
 let socket = require('./socket/socket-app')
 
 //console.log(process.env.ELECTRON_ENABLE_LOGGING)
-process.env.NODE_ENV = "production"
+//process.env.NODE_ENV = "production"
 
 const iconPath = path.join(__dirname, '/logo.png')
 //server.maxConnections = 1

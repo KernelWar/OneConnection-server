@@ -1,6 +1,6 @@
 const socket = require('socket.io')
 const mouse = require("../api-win/mouse-win")
-const volume = require('../api-win/volume-win')
+const volume = require("win-audio").speaker
 const nircmd = require('nircmd')
 const WmiClient = require('wmi-client')
 const battery = require("../api-win/battery-win")
@@ -114,12 +114,10 @@ function listenDirectoryModule(socket) {
 }
 function listenMediaModule(socket) {
     socket.on("setVolume", vol => {
-        volume.setVolume(vol)
+        volume.set(vol)
     })
     socket.on("getVolume", () => {
-        volume.getVolume().then((vol) => {
-            io.emit("onVolume", vol)
-        })
+        io.emit("onVolume", volume.get())
     })
     socket.on("playOrPause", () => {
         shorcutsMedia.play()
@@ -250,9 +248,9 @@ function desconectedClient() {
 function dataInit() {
     if (clientConnected()) {
         console.log("update data -> ", getTimeNow())
-        volume.getVolume().then((vol) => {
-            io.emit("onVolume", vol)
-        })
+       io.emit("onVolume", volume.get())
+        
+
         //getBrightness
         wmi.cwd = global._pathApp + "/node_modules/wmi-client"
         addLog(global._pathApp)
