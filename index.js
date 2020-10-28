@@ -209,9 +209,10 @@ app.on('ready', () => {
     win.loadFile('src/index.html')
     win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
-    win.webContents.openDevTools()
+    if( gCONFIG.NODE_ENV != 'production'){
+        win.webContents.openDevTools()
+    }
 
-    
     let tray = new Tray(iconPath)
     const ctx = Menu.buildFromTemplate([
         {
