@@ -1,6 +1,6 @@
 {
   "name": "mouse",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Server controlador de Windows",
   "main": "index.js",
   "scripts": {
