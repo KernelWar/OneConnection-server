@@ -66,14 +66,15 @@ function moveScrollUp() {
 }
 
 function moveMouse(coords) {
+    //console.log(coords)
     //Tiempo mas rapido 1583
     let cursor = screen.getCursorScreenPoint()
     var x = cursor.x
     var y = cursor.y
     var ix = cursor.x
     var iy = cursor.y
-    if (coords.speed > 11.6 && coords.speed <= 67) {
-        s = 20 - parseInt((coords.speed * 20) / 67)
+    if (coords.speed > 11.6 && coords.speed <= 80) {
+        s = 20 - parseInt((coords.speed * 20) / 80)
         if (s == 0) {
             s = 1
         }
