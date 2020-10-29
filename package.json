@@ -10,12 +10,12 @@
     "package": "electron-packager . --platform=win32 --arch=x64 outexe --asar",
     "make": "electron-forge make",
     "dist": "electron-builder",
+    "publish": "electron-builder -p always",
     "package-forge": "electron-forge package"
   },
-  "env": {
-    "ELECTRON_NO_ASAR": null,
-    "ELECTRON_ENABLE_LOGGING": true,
-    "NODE_ENV": "production"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KernelWar/mouse-server.git"
   },
   "author": "KernelWar",
   "license": "ISC",
@@ -85,6 +85,7 @@
     "qrcode": "^1.4.4",
     "ref-napi": "^2.1.2",
     "socket.io": "^2.3.0",
+    "update-electron-app": "^2.0.1",
     "win-audio": "^2.0.2",
     "wmi-client": "^0.5.0"
   },

@@ -117,7 +117,7 @@
                         <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#hdd-network" />
                     </svg>
                     Puerto</a>
-                <a class="dropdown-item  btn-sm" href="#">
+                <a id="item-update" class="dropdown-item  btn-sm" href="#">
                     <svg class="bi" width="16" height="16" fill="currentColor">
                         <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#cloud-check" />
                     </svg>
@@ -219,7 +219,9 @@
                 $("#wait-device").show();
             }
         }, 1000);
-
+        $("#item-update").click(function(){
+            ipcRenderer.send('checkUpdate')
+        })
         $("#item-network").click(function () {
             let interfaces = os.networkInterfaces()
             $("#list-interface").html("")

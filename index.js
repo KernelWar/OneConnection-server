@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } = require('electron')
+const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, autoUpdater } = require('electron')
 const gCONFIG = require('./config.js')
 const express = require('express')
 const http = require('http')
@@ -26,13 +26,13 @@ let win
 let pathConfigServer
 let pathConfigFixDevice
 
-if( gCONFIG.NODE_ENV == 'production'){
+if (gCONFIG.NODE_ENV == 'production') {
     addLog('PRODUCTION')
     console.log("----PRODUCTION-----")
-    global._pathApp = process.resourcesPath+"/app.asar.unpacked"
-    pathConfigServer = global._pathApp+"/config/configServer.json"
-    pathConfigFixDevice = global._pathApp+"/config/fixDevice.json"
-}else{
+    global._pathApp = process.resourcesPath + "/app.asar.unpacked"
+    pathConfigServer = global._pathApp + "/config/configServer.json"
+    pathConfigFixDevice = global._pathApp + "/config/fixDevice.json"
+} else {
     addLog('DEVELOPMENT')
     console.log("----DEVELOPMENT-----")
     global._pathApp = __dirname
@@ -41,27 +41,27 @@ if( gCONFIG.NODE_ENV == 'production'){
 }
 
 
-fs.readFile(pathConfigServer,function (err, data){
-    if(err){
+fs.readFile(pathConfigServer, function (err, data) {
+    if (err) {
         console.log(err)
         addLog(err)
-    }else{ 
-        if(data.isNull() == false){
+    } else {
+        if (data.isNull() == false) {
             let jsonData = JSON.parse(data)
             host = jsonData['host']
             port = jsonData['port']
-           
-           
-        }else{
+
+
+        } else {
             host = ip.address()
             port = 8080
         }
-                     
+
         appexpress.use(cors())
         appexpress.use(express.json())
         appexpress.set('port', port)
         appexpress.set('host', host)
-                
+
         global._port = port
         global._host = host
         appexpress.get('/', (req, res) => {
@@ -72,17 +72,17 @@ fs.readFile(pathConfigServer,function (err, data){
             //console.log("getMaxListeners -> ",server.getMaxListeners())
         })
 
-        appexpress.post("/requestConnection", function(res, req){
+        appexpress.post("/requestConnection", function (res, req) {
             let status = {
                 message: "server ready"
             }
-            if(socket.clientConnected() == false){                
+            if (socket.clientConnected() == false) {
                 //server disponible - Acceso concedido
                 req.status(200).send(status)
-            }else{
+            } else {
                 //server lleno - Acceso denegado
-                console.log("requestConnection -> ", res.body, "-> ",socket.getTimeNow())
-                console.log("Server full - faild request -> ",socket.getTimeNow())
+                console.log("requestConnection -> ", res.body, "-> ", socket.getTimeNow())
+                console.log("Server full - faild request -> ", socket.getTimeNow())
                 status.message = "server complete"
                 req.status(200).send(status)
             }
@@ -93,84 +93,96 @@ fs.readFile(pathConfigServer,function (err, data){
     }
 })
 
-function addLog(data){
+function addLog(data) {
     //dialog.showMessageBox({title: 'hola',message:data})
-    data = "\n\n"+data
-    fs.appendFileSync('C:/Users/Jose/Desktop/config/logs.txt',data, { encoding: "utf8", flag: "w" } )
+    data = "\n\n" + data
+    fs.appendFileSync('C:/Users/Jose/Desktop/config/logs.txt', data, { encoding: "utf8", flag: "w" })
 }
+//token 8651a90880760470f26ccdefd8b14f357048ed67
+/*
+autoUpdater.setFeedURL({
+    url: 'http://localhost/test-autoupdate/mouse-server-0.1.0/package.json'
+})
+autoUpdater.on('error', message => {
+    console.error('There was a problem updating the application')
+    console.error(message)
+})
+*/
+ipcMain.on("checkUpdate", (event) => {
+    console.log("CHECK UPDATE")
+    //autoUpdater.checkForUpdates()
+    require('update-electron-app')();  
+})
 
-
-
-
-ipcMain.on("setHost", (event,newhost) => {
+ipcMain.on("setHost", (event, newhost) => {
     global._host = newhost;
     appexpress.set('host', newhost)
     host = newhost
 });
 
-ipcMain.on("setPort", (event,newport) => {
+ipcMain.on("setPort", (event, newport) => {
     global._port = newport;
     appexpress.set('port', newport)
     port = newport
 });
 
-ipcMain.on("desconectClient", (event) =>{
+ipcMain.on("desconectClient", (event) => {
     socket.desconectedClient()
     removeDevice()
 })
 
-ipcMain.on("fixConnection", (event)=>{
+ipcMain.on("fixConnection", (event) => {
     let data = {
         system: global._system,
         device: global._device,
         uuid: global._uuid
     }
-    fs.writeFileSync(pathConfigFixDevice, JSON.stringify(data), function(err){
-        if(err){
+    fs.writeFileSync(pathConfigFixDevice, JSON.stringify(data), function (err) {
+        if (err) {
             console.log(err)
             addLog(err)
         }
     })
 })
 
-ipcMain.on("removefixConnection", (event)=>{
+ipcMain.on("removefixConnection", (event) => {
     deleteDeviceFixed()
 })
 
-function deleteDeviceFixed(){
+function deleteDeviceFixed() {
     let data = {
         system: '',
         device: '',
         uuid: ''
     }
-    fs.writeFileSync(pathConfigFixDevice, JSON.stringify(data), function(err){
-        if(err){
+    fs.writeFileSync(pathConfigFixDevice, JSON.stringify(data), function (err) {
+        if (err) {
             console.log(err)
             addLog(err)
         }
     })
 }
 
-ipcMain.on("resetSocketServer", (event) => {  
-    writeFileServerConfiguration()  
-    resetSocketServer()        
+ipcMain.on("resetSocketServer", (event) => {
+    writeFileServerConfiguration()
+    resetSocketServer()
 });
 
-function removeDevice(){
+function removeDevice() {
     global._system = null
     global._device = null
-    if(global._fix == true){
+    if (global._fix == true) {
         deleteDeviceFixed()
     }
 }
 
-function writeFileServerConfiguration(){
+function writeFileServerConfiguration() {
     let data = {
         host,
         port
     }
-    fs.writeFileSync(pathConfigServer, JSON.stringify(data), function(err){
-        if(err){
+    fs.writeFileSync(pathConfigServer, JSON.stringify(data), function (err) {
+        if (err) {
             console.log(err)
             addLog(err)
         }
@@ -182,13 +194,13 @@ function resetSocketServer() {
     socket.deleteSocketServer()
     server.close()
     server = http.createServer(appexpress)
-    socket.initServer(server) 
+    socket.initServer(server)
     server.listen(appexpress.get('port'), appexpress.get('host'), () => {
         console.log(`Reset: Server listening on ${host}:${port}`)
-    })  
+    })
     socket.listenInConnect()
     socket.listenInConnection()
-   
+
 }
 
 app.on('ready', () => {
@@ -209,7 +221,7 @@ app.on('ready', () => {
     win.loadFile('src/index.html')
     win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
-    if( gCONFIG.NODE_ENV != 'production'){
+    if (gCONFIG.NODE_ENV != 'production') {
         win.webContents.openDevTools()
     }
 
