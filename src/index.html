@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Control Kernel Server</title>
+    <title>Control Kernel Server 0.2.0</title>
 
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
@@ -117,11 +117,13 @@
                         <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#hdd-network" />
                     </svg>
                     Puerto</a>
+                    <!--
                 <a id="item-update" class="dropdown-item  btn-sm" href="#">
                     <svg class="bi" width="16" height="16" fill="currentColor">
                         <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#cloud-check" />
                     </svg>
                     Buscar actualizaciones</a>
+                    -->
             </div>
         </div>
     </div>
@@ -219,9 +221,11 @@
                 $("#wait-device").show();
             }
         }, 1000);
+        /*
         $("#item-update").click(function(){
             ipcRenderer.send('checkUpdate')
         })
+        */
         $("#item-network").click(function () {
             let interfaces = os.networkInterfaces()
             $("#list-interface").html("")
@@ -242,7 +246,8 @@
 
         $("#btn-close").click(function () {
             //const min = require("electron").remote.getCurrentWindow().close();
-            const min = remote.getCurrentWindow().hide();
+            //const min = remote.getCurrentWindow().hide();
+            ipcRenderer.send('closeAll')
         });
 
         $("#item-port").click(function () {

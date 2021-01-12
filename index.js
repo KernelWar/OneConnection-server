@@ -1,5 +1,5 @@
-const { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, autoUpdater } = require('electron')
-const gCONFIG = require('./config.js')
+const { app, BrowserWindow, nativeImage, ipcMain } = require('electron')
+
 const express = require('express')
 const http = require('http')
 const ip = require('ip')
@@ -10,10 +10,14 @@ const path = require('path')
 const appexpress = express()
 let server = http.createServer(appexpress)
 let socket = require('./socket/socket-app')
+const { isIPv4 } = require('net')
 
 //console.log(process.env.ELECTRON_ENABLE_LOGGING)
 //process.env.NODE_ENV = "production"
-console.log(gCONFIG.NODE_ENV)
+let gCONFIG = {
+    //NODE_ENV: 'production'
+    NODE_ENV: 'development'
+}
 const iconPath = path.join(__dirname, '/logo.png')
 //server.maxConnections = 1
 //server.setMaxListeners = 2
@@ -21,19 +25,18 @@ const iconPath = path.join(__dirname, '/logo.png')
 socket.initServer(server)
 
 var host = ip.address()
+console.log('IP HOST -> ',host)
 var port = 8080
 let win
 let pathConfigServer
 let pathConfigFixDevice
 
 if (gCONFIG.NODE_ENV == 'production') {
-    addLog('PRODUCTION')
     console.log("----PRODUCTION-----")
     global._pathApp = process.resourcesPath + "/app.asar.unpacked"
     pathConfigServer = global._pathApp + "/config/configServer.json"
     pathConfigFixDevice = global._pathApp + "/config/fixDevice.json"
 } else {
-    addLog('DEVELOPMENT')
     console.log("----DEVELOPMENT-----")
     global._pathApp = __dirname
     pathConfigServer = (path.join(__dirname, 'config/configServer.json'))
@@ -44,14 +47,17 @@ if (gCONFIG.NODE_ENV == 'production') {
 fs.readFile(pathConfigServer, function (err, data) {
     if (err) {
         console.log(err)
-        addLog(err)
     } else {
         if (data.isNull() == false) {
             let jsonData = JSON.parse(data)
             host = jsonData['host']
             port = jsonData['port']
-
-
+            if(!isIPv4(host)){
+                host = ip.address()
+            }
+            if(!Number(port)){
+                port = 8080    
+            }
         } else {
             host = ip.address()
             port = 8080
@@ -93,11 +99,6 @@ fs.readFile(pathConfigServer, function (err, data) {
     }
 })
 
-function addLog(data) {
-    //dialog.showMessageBox({title: 'hola',message:data})
-    data = "\n\n" + data
-    fs.appendFileSync('C:/Users/Jose/Desktop/config/logs.txt', data, { encoding: "utf8", flag: "w" })
-}
 //token 8651a90880760470f26ccdefd8b14f357048ed67
 /*
 autoUpdater.setFeedURL({
@@ -108,12 +109,17 @@ autoUpdater.on('error', message => {
     console.error(message)
 })
 */
+/*
 ipcMain.on("checkUpdate", (event) => {
     console.log("CHECK UPDATE")
     //autoUpdater.checkForUpdates()
-    require('update-electron-app')();  
+    require('update-electron-app')({
+        repo: 'KernelWar/mouse-server',
+        updateInterval: '5 minutes',
+        logger: require('electron-log')
+      })
 })
-
+*/
 ipcMain.on("setHost", (event, newhost) => {
     global._host = newhost;
     appexpress.set('host', newhost)
@@ -140,7 +146,7 @@ ipcMain.on("fixConnection", (event) => {
     fs.writeFileSync(pathConfigFixDevice, JSON.stringify(data), function (err) {
         if (err) {
             console.log(err)
-            addLog(err)
+
         }
     })
 })
@@ -158,7 +164,6 @@ function deleteDeviceFixed() {
     fs.writeFileSync(pathConfigFixDevice, JSON.stringify(data), function (err) {
         if (err) {
             console.log(err)
-            addLog(err)
         }
     })
 }
@@ -166,6 +171,13 @@ function deleteDeviceFixed() {
 ipcMain.on("resetSocketServer", (event) => {
     writeFileServerConfiguration()
     resetSocketServer()
+});
+
+
+ipcMain.on("closeAll", (event) => {
+    socket.deleteSocketServer()
+    server.close()
+    win.close()
 });
 
 function removeDevice() {
@@ -184,7 +196,6 @@ function writeFileServerConfiguration() {
     fs.writeFileSync(pathConfigServer, JSON.stringify(data), function (err) {
         if (err) {
             console.log(err)
-            addLog(err)
         }
     })
 }
@@ -221,10 +232,11 @@ app.on('ready', () => {
     win.loadFile('src/index.html')
     win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
+    
     if (gCONFIG.NODE_ENV != 'production') {
         win.webContents.openDevTools()
     }
-
+/*
     let tray = new Tray(iconPath)
     const ctx = Menu.buildFromTemplate([
         {
@@ -254,4 +266,5 @@ app.on('ready', () => {
         }
     ])
     tray.setContextMenu(ctx)
+    */
 })

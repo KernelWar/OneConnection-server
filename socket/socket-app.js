@@ -174,11 +174,6 @@ function listenSesionModule(socket) {
     }, 1000);
 }
 
-function addLog(data){
-    data = "\n\n"+data
-    fs.appendFileSync('C:/Users/Jose/Desktop/config/logs.txt',data, { encoding: "utf8", flag: "w" } )
-}
-
 function loadDevice(device) {
     let data
     let dir
@@ -253,7 +248,7 @@ function dataInit() {
 
         //getBrightness
         wmi.cwd = global._pathApp + "/node_modules/wmi-client"
-        addLog(global._pathApp)
+        
         wmi.query(query,function (err, res) {
             if (err) {
                 console.log(err)

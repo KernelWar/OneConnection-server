@@ -1,6 +1,6 @@
 {
   "name": "mouse",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Server controlador de Windows",
   "main": "index.js",
   "scripts": {
@@ -10,12 +10,8 @@
     "package": "electron-packager . --platform=win32 --arch=x64 outexe --asar",
     "make": "electron-forge make",
     "dist": "electron-builder",
-    "publish": "electron-builder -p always",
+    "publish": "set GH_TOKEN=8651a90880760470f26ccdefd8b14f357048ed67 && electron-builder -p always",
     "package-forge": "electron-forge package"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/KernelWar/mouse-server.git"
   },
   "author": "KernelWar",
   "license": "ISC",
@@ -72,6 +68,7 @@
     "bootstrap": "^4.5.2",
     "bootstrap-icons": "^1.0.0",
     "cors": "^2.8.5",
+    "electron-log": "^4.3.0",
     "express": "^4.17.1",
     "ffi-napi": "^3.0.1",
     "ip": "^1.1.5",
@@ -85,7 +82,6 @@
     "qrcode": "^1.4.4",
     "ref-napi": "^2.1.2",
     "socket.io": "^2.3.0",
-    "update-electron-app": "^2.0.1",
     "win-audio": "^2.0.2",
     "wmi-client": "^0.5.0"
   },
