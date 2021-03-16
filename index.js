@@ -15,8 +15,8 @@ const { isIPv4 } = require('net')
 //console.log(process.env.ELECTRON_ENABLE_LOGGING)
 //process.env.NODE_ENV = "production"
 let gCONFIG = {
-    //NODE_ENV: 'production'
-    NODE_ENV: 'development'
+    NODE_ENV: 'production'
+    //NODE_ENV: 'development'
 }
 const iconPath = path.join(__dirname, '/logo.png')
 //server.maxConnections = 1
@@ -52,7 +52,7 @@ fs.readFile(pathConfigServer, function (err, data) {
             let jsonData = JSON.parse(data)
             host = jsonData['host']
             port = jsonData['port']
-            if(!isIPv4(host)){
+            if(!isIPv4(host) || host != ip.address()){
                 host = ip.address()
             }
             if(!Number(port)){
@@ -73,11 +73,12 @@ fs.readFile(pathConfigServer, function (err, data) {
         appexpress.get('/', (req, res) => {
             res.send("API funcionando !!")
         })
-        server.listen(appexpress.get('port'), appexpress.get('host'), () => {
+        server.listen(appexpress.get('port'), appexpress.get('host'), (error) => {
+            console.log(error)
             console.log(`Server listening on ${host}:${port}`)
             //console.log("getMaxListeners -> ",server.getMaxListeners())
         })
-
+        
         appexpress.post("/requestConnection", function (res, req) {
             let status = {
                 message: "server ready"
@@ -227,12 +228,16 @@ app.on('ready', () => {
         transparent: true,
         frame: false,
         center: true,
-        maximizable: false
+        maximizable: false,
+        show: false
     })
     win.loadFile('src/index.html')
     win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
-    
+    setTimeout(()=>{
+        win.show()
+        console.log('show win')
+    }, 1500)
     if (gCONFIG.NODE_ENV != 'production') {
         win.webContents.openDevTools()
     }
