@@ -183,6 +183,19 @@ function loadDevice(device) {
         dir = (path.join(__dirname, '../config/fixDevice.json'))
     }
     data = fs.readFileSync(dir)
+    if(data.isNull()){
+        let objFixNull = {
+            "system": "", 
+            "device": "", 
+            "uuid": ""
+        }
+        fs.writeFileSync(dir, JSON.stringify(objFixNull), function (err) {
+            if (err) {
+                console.log(err)    
+            }
+        })
+    }    
+    data = fs.readFileSync(dir)
     //Si hay conexion fija
     if (data.isNull() == false) {
         let dData = JSON.parse(data)
@@ -204,14 +217,14 @@ function loadDevice(device) {
                 console.log("conexion denegada -> [", dData['uuid'], "] -> ", dData['uuid'].length)
                 socket.emit("desconectDevice")
             } else {
-                console.log("No hay conexion dija")
+                console.log("No hay conexion fija")
                 global._system = device.system
                 global._device = device.device
                 global._uuid = device.uuid
                 global._fix = false
             }
         }
-    } else {
+    } else {        
         console.log("fix null")
     }
 }
@@ -243,13 +256,13 @@ function desconectedClient() {
 function dataInit() {
     if (clientConnected()) {
         console.log("update data -> ", getTimeNow())
-       io.emit("onVolume", volume.get())
-        
+        io.emit("onVolume", volume.get())
+
 
         //getBrightness
         wmi.cwd = global._pathApp + "/node_modules/wmi-client"
-        
-        wmi.query(query,function (err, res) {
+
+        wmi.query(query, function (err, res) {
             if (err) {
                 console.log(err)
             } else {
@@ -263,7 +276,7 @@ function dataInit() {
                 //console.log(level)
             }
         })
-        battery().then((level) =>{            
+        battery().then((level) => {
             if (level) {
                 io.emit("onBattery", (level * 100))
             } else {

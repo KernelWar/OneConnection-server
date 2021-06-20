@@ -19,7 +19,6 @@
     "asar": true,
     "asarUnpack": [
       "config/",
-      "node_modules/bootstrap/",
       "node_modules/wmi-client"
     ],
     "productName": "Control Kernel Server",

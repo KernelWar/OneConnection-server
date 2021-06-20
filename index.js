@@ -15,8 +15,8 @@ const { isIPv4 } = require('net')
 //console.log(process.env.ELECTRON_ENABLE_LOGGING)
 //process.env.NODE_ENV = "production"
 let gCONFIG = {
-    NODE_ENV: 'production'
-    //NODE_ENV: 'development'
+    //NODE_ENV: 'production'
+    NODE_ENV: 'development'
 }
 const iconPath = path.join(__dirname, '/logo.png')
 //server.maxConnections = 1
@@ -25,7 +25,7 @@ const iconPath = path.join(__dirname, '/logo.png')
 socket.initServer(server)
 
 var host = ip.address()
-console.log('IP HOST -> ',host)
+console.log('IP HOST -> ', host)
 var port = 8080
 let win
 let pathConfigServer
@@ -52,11 +52,11 @@ fs.readFile(pathConfigServer, function (err, data) {
             let jsonData = JSON.parse(data)
             host = jsonData['host']
             port = jsonData['port']
-            if(!isIPv4(host) || host != ip.address()){
+            if (!isIPv4(host) || host != ip.address()) {
                 host = ip.address()
             }
-            if(!Number(port)){
-                port = 8080    
+            if (!Number(port)) {
+                port = 8080
             }
         } else {
             host = ip.address()
@@ -78,7 +78,7 @@ fs.readFile(pathConfigServer, function (err, data) {
             console.log(`Server listening on ${host}:${port}`)
             //console.log("getMaxListeners -> ",server.getMaxListeners())
         })
-        
+
         appexpress.post("/requestConnection", function (res, req) {
             let status = {
                 message: "server ready"
@@ -215,6 +215,7 @@ function resetSocketServer() {
 
 }
 
+
 app.on('ready', () => {
     win = new BrowserWindow({
         width: 360,
@@ -234,42 +235,41 @@ app.on('ready', () => {
     win.loadFile('src/index.html')
     win.removeMenu()
     win.setIcon(nativeImage.createFromPath(iconPath))
-    setTimeout(()=>{
+    win.once('ready-to-show', () => {
         win.show()
-        console.log('show win')
-    }, 1500)
+    })
     if (gCONFIG.NODE_ENV != 'production') {
         win.webContents.openDevTools()
     }
-/*
-    let tray = new Tray(iconPath)
-    const ctx = Menu.buildFromTemplate([
-        {
-            label: 'Ver conexión',
-            type: 'normal',
-            click: () => {
-                win.show()
+    /*
+        let tray = new Tray(iconPath)
+        const ctx = Menu.buildFromTemplate([
+            {
+                label: 'Ver conexión',
+                type: 'normal',
+                click: () => {
+                    win.show()
+                }
+            },
+            {
+                label: 'Reiniciar app',
+                type: 'normal',
+                click: () => {
+                    resetSocketServer()
+                    app.relaunch()
+                    app.quit()
+                }
+            },
+            { type: 'separator' },
+            {
+                label: 'Cerrar todo',
+                type: 'normal',
+                click: () => {
+                    server.close()
+                    app.exit()
+                }
             }
-        },
-        {
-            label: 'Reiniciar app',
-            type: 'normal',
-            click: () => {
-                resetSocketServer()
-                app.relaunch()
-                app.quit()
-            }
-        },
-        { type: 'separator' },
-        {
-            label: 'Cerrar todo',
-            type: 'normal',
-            click: () => {
-                server.close()
-                app.exit()
-            }
-        }
-    ])
-    tray.setContextMenu(ctx)
-    */
+        ])
+        tray.setContextMenu(ctx)
+        */
 })
