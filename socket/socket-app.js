@@ -130,6 +130,44 @@ function listenMediaModule(socket) {
     })
 }
 function listenSesionModule(socket) {
+
+    let commandCmd = null
+    console.log(process.env.NODE_ENV)
+    if (process.env.NODE_ENV == 'production') {
+        commandCmd = process.resourcesPath + "/app.asar.unpacked/config/displayOff.bat"
+    } else {
+        commandCmd = (path.join(__dirname, '../config/displayOff.bat'))
+    }
+
+    socket.on("offScreen", () => {
+        let message = {
+            error: false,
+            status: '',
+            message: ''
+        }
+        const cmd = require('node-cmd');
+        let wait = new Promise((resolve, reject) => {
+            cmd.get("start /B " + commandCmd, function (err, data) {
+                if (err) {
+                    console.log(err)
+                    message.error = true
+                    message.status = 'fail'
+                    message.message = err
+                    reject(message)
+                } else {
+                    message.error = false
+                    message.status = 'success'
+                    message.message = 'Pantalla apagada'
+                    resolve(message)
+                }
+            })
+        }).then((data) => {
+            socket.emit("onStatusSession", data)
+        }).catch((error) => {
+            socket.emit("onStatusSession", error)
+        })
+    })
+
     socket.on("turnOffPC", () => {
         session.turnOff().then((data) => {
             socket.emit("onStatusSession", data)
@@ -183,18 +221,18 @@ function loadDevice(device) {
         dir = (path.join(__dirname, '../config/fixDevice.json'))
     }
     data = fs.readFileSync(dir)
-    if(data.isNull()){
+    if (data.isNull()) {
         let objFixNull = {
-            "system": "", 
-            "device": "", 
+            "system": "",
+            "device": "",
             "uuid": ""
         }
         fs.writeFileSync(dir, JSON.stringify(objFixNull), function (err) {
             if (err) {
-                console.log(err)    
+                console.log(err)
             }
         })
-    }    
+    }
     data = fs.readFileSync(dir)
     //Si hay conexion fija
     if (data.isNull() == false) {
@@ -224,7 +262,7 @@ function loadDevice(device) {
                 global._fix = false
             }
         }
-    } else {        
+    } else {
         console.log("fix null")
     }
 }
