@@ -1,37 +1,97 @@
 {
-    "name": "mouse",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-        "start": "electromon .",
-        "start-e": "electron ."
+  "name": "mouse",
+  "version": "0.2.0",
+  "description": "Server controlador de Windows",
+  "main": "index.js",
+  "scripts": {
+    "start": "electromon .",
+    "start-prod": "set NODE_ENV=production && set ELECTRON_ENABLE_LOGGING=true && set ELECTRON_DEFAULT_ERROR_MODE=true && electron .",
+    "start-e": "electron .",
+    "package": "electron-packager . --platform=win32 --arch=x64 outexe --asar",
+    "make": "electron-forge make",
+    "dist": "electron-builder",
+    "publish": "set GH_TOKEN=8651a90880760470f26ccdefd8b14f357048ed67 && electron-builder -p always",
+    "package-forge": "electron-forge package"
+  },
+  "author": "KernelWar",
+  "license": "ISC",
+  "build": {
+    "asar": true,
+    "asarUnpack": [
+      "config/",
+      "node_modules/wmi-client"
+    ],
+    "productName": "Control Kernel Server",
+    "win": {
+      "icon": "logo.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "battery-level": "^3.0.0",
-        "bootstrap": "^4.5.0",
-        "bootstrap-icons": "^1.0.0",
-        "brightness": "^3.0.0",
-        "cors": "^2.8.5",
-        "express": "^4.17.1",
-        "ffi-napi": "^3.0.1",
-        "fs": "0.0.1-security",
-        "ip": "^1.1.5",
-        "jquery": "^3.5.1",
-        "node-cmd": "^3.0.0",
-        "node-disk-info": "^1.1.0",
-        "os-utils": "0.0.14",
-        "qrcode": "^1.4.4",
-        "ref-napi": "^2.0.3",
-        "socket.io": "^2.3.0",
-        "system-control": "^0.1.1",
-        "win-audio": "^2.0.2"
-    },
-    "devDependencies": {
-        "electromon": "^1.0.10",
-        "electron": "^9.1.1",
-        "electron-rebuild": "^1.11.0"
+    "nsis": {
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "oneClick": false,
+      "perMachine": true
     }
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "icon": "logo.ico",
+        "asar": true
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "CKS",
+            "author": "KernelWar",
+            "description": "prueba exe",
+            "setupIcon": "logo.ico"
+          },
+          "packagerConfig": {
+            "icon": "logo.ico"
+          }
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "battery-level": "^3.0.0",
+    "bootstrap": "^4.5.2",
+    "bootstrap-icons": "^1.0.0",
+    "cors": "^2.8.5",
+    "electron-log": "^4.3.0",
+    "express": "^4.17.1",
+    "ffi-napi": "^3.0.1",
+    "ip": "^1.1.5",
+    "jquery": "^3.5.1",
+    "mustache": "^4.0.1",
+    "nircmd": "^2.0.0",
+    "node-cmd": "^3.0.0",
+    "node-disk-info": "^1.1.0",
+    "os": "^0.1.1",
+    "os-utils": "0.0.14",
+    "qrcode": "^1.4.4",
+    "ref-napi": "^2.1.2",
+    "socket.io": "^2.3.0",
+    "win-audio": "^2.0.2",
+    "wmi-client": "^0.5.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.53",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.53",
+    "electromon": "^1.0.10",
+    "electron": "^10.1.2",
+    "electron-builder": "^22.8.1",
+    "electron-builder-squirrel-windows": "^22.9.1",
+    "electron-wix-msi": "^3.0.3",
+    "npm-merge-driver": "^2.3.6"
+  }
 }

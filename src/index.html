@@ -3,14 +3,16 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Mouse server</title>
+    <title>Control Kernel Server 0.2.0</title>
 
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/index.css" />
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap-grid.min.css" />
+    
 </head>
 
 <body>
@@ -26,22 +28,37 @@
                 </button>
             </div>
         </div>
-        <div id="content-qr">
-            <br />
-            <p>Con tu dispositivo escanea el QR</p>
-            <canvas id="qr_ip" width="500"></canvas>
+        <div class="container">
+            <div id="content-data-connection" class="row">
+                <div id="content-qr" class="col-12">
+                    <br />
+                    <p>Con tu dispositivo escanea el QR</p>
+                    <canvas id="qr_ip" width="500"></canvas>
+                    <br>
+                    <span id="data-host-server" class="badge"></span>
+                </div>
+            </div>
         </div>
 
         <div id="content-device" class="container">
             <div id="device-info" class="row">
                 <div class="col-12">
                     <div class="card text-center text-white bg-dark border-dark">
-                        <div class="card-header">Dispositivo</div>
+                        <div id="header-card" class="card-header">
+                            <div id="title-header-card">Dispositivo</div>
+                            <button id="btn-delete-device" type="button"
+                                class="btn btn-outline-danger btn-sm">Eliminar</button>
+                        </div>
                         <div class="card-body">
-                            <h5 id="txt-system" class="card-title">---</h5>
-                            <p id="txt-device" class="card-text">---</p>
+                            <h5 id="txt-device" class="card-title">---</h5>
+                            <p id="txt-system" class="card-text">---</p>
                             <img src="img/aplicacion.svg" width="30" alt="" />
-                            <br /><br />
+                            <div class="form-check col-form-label-sm">
+                                <input class="form-check-input" type="checkbox" value="" id="fixConnection">
+                                <label class="form-check-label " for="fixConnection">
+                                    Fijar conexión
+                                </label>
+                            </div>
                             <span id="status-success" class="badge">Conexión establecida</span>
                             <div id="connect-success">
                                 <div class="spinner-grow spinner-grow-sm text-success" role="status">
@@ -60,7 +77,7 @@
             </div>
             <div id="wait-device" class="row">
                 <div class="col-12">
-                    <div class="card text-center text-white bg-dark border-dark" >
+                    <div class="card text-center text-white bg-dark border-dark">
                         <div class="card-header ">Estado</div>
                         <div class="card-body">
                             <span class="badge badge-danger">Esperando conexión</span>
@@ -81,12 +98,117 @@
             </div>
         </div>
     </div>
+    <div id="btns-configuration">
+        <div class="btn-group">
+            <button type="button" class="btn dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+                <svg class="bi" width="16" height="16" fill="currentColor">
+                    <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#gear-fill" />
+                </svg> Configuración
+            </button>
+            <div class="dropdown-menu">
+                <a id="item-network" class="dropdown-item  btn-sm" href="#" data-toggle="modal"
+                    data-target="#interfaceNetworkModdal">
+                    <svg class="bi" width="16" height="16" fill="currentColor">
+                        <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#diagram-2" />
+                    </svg>
+                    Interfaz de red</a>
+                <a id="item-port" class="dropdown-item  btn-sm" href="#" data-toggle="modal" data-target="#changePort">
+                    <svg class="bi" width="16" height="16" fill="currentColor">
+                        <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#hdd-network" />
+                    </svg>
+                    Puerto</a>
+                    <!--
+                <a id="item-update" class="dropdown-item  btn-sm" href="#">
+                    <svg class="bi" width="16" height="16" fill="currentColor">
+                        <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#cloud-check" />
+                    </svg>
+                    Buscar actualizaciones</a>
+                    -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="interfaceNetworkModdal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Seleccione interfaz de red</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="list-interface" class="list-group">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="changePort" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Puerto</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <svg class="bi" width="16" height="16" fill="currentColor">
+                                            <use
+                                                xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#hdd-network" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <input id="port-server" title="Debes ingresar un número de puerto"
+                                    pattern="/^([0-9])*$/" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <button id="btnSetPort" type="button"
+                                class="btn btn-outline-primary btn-sm">Guardar</button>
+                        </div>
+                    </form><br>
+
+                </div>
+            </div>
+        </div>
+        <div id="toast-port" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="mr-auto">Atención</strong>
+            </div>
+            <div class="toast-body">
+                El puerto no es valido
+            </div>
+        </div>
+    </div>
+
     <script>
         window.jQuery = window.$ = require("jquery");
-        const remote = require("electron").remote;
+    </script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const QRCode = require('qrcode');
+        const Mustache = require('mustache')
+        const os = require("os")
+
+        const { remote, ipcRenderer } = require("electron");
+        generateQR()
         $("#wait-device").hide();
         $("#device-info").hide();
         const checkDevice = setInterval(() => {
+            if (remote.getGlobal("_fix") == true) {
+                $("#fixConnection").prop('checked', true);
+            }
             if (
                 remote.getGlobal("_system") != null &&
                 remote.getGlobal("_device") != null
@@ -100,18 +222,98 @@
                 $("#wait-device").show();
             }
         }, 1000);
-
+        /*
+        $("#item-update").click(function(){
+            ipcRenderer.send('checkUpdate')
+        })
+        */
+        $("#item-network").click(function () {
+            let interfaces = os.networkInterfaces()
+            $("#list-interface").html("")
+            for (const item in interfaces) {
+                if (interfaces.hasOwnProperty(item)) {
+                    const element = interfaces[item][1];
+                    if (element['address'] != "127.0.0.1") {
+                        element['name'] = item
+                        $("#list-interface").append(Mustache.render($("#templateNetworkInterface").html(), element))
+                    }
+                }
+            }
+        })
         $("#btn-minimizade").click(function () {
             $(this).blur();
-            const min = require("electron").remote.getCurrentWindow().minimize();
+            const min = remote.getCurrentWindow().minimize();
         });
 
         $("#btn-close").click(function () {
-            const min = require("electron").remote.getCurrentWindow().close();
+            //const min = require("electron").remote.getCurrentWindow().close();
+            //const min = remote.getCurrentWindow().hide();
+            ipcRenderer.send('closeAll')
         });
+
+        $("#item-port").click(function () {
+            $("#port-server").val(remote.getGlobal('_port'))
+        })
+
+        $("#btnSetPort").click(function () {
+            let newPort = $("#port-server").val()
+            newPort = parseInt(newPort)
+            if (newPort >= 0) {
+                ipcRenderer.send('setPort', newPort)
+                generateQR()
+                ipcRenderer.send('resetSocketServer')
+                $('#changePort').modal('toggle')
+            } else {
+                $("#toast-port").toast({
+                    delay: 4000,
+                    autohide: true
+                })
+                $("#toast-port").toast("show")
+            }
+        })
+
+        $("#btn-delete-device").click(function () {
+            ipcRenderer.send('desconectClient')
+        })
+
+        $("#fixConnection").change(function () {
+            var status = $("#fixConnection").is(':checked')
+            if (status) {
+                ipcRenderer.send("fixConnection")
+            } else {
+                ipcRenderer.send("removefixConnection")
+            }
+        })
+
+        function setIPServer(newip) {
+            ipcRenderer.send('setHost', newip)
+            generateQR()
+            $('#interfaceNetworkModdal').modal('toggle')
+            ipcRenderer.send('resetSocketServer')
+        }
+
+        function generateQR() {
+            const canvas = document.getElementById('qr_ip')
+            const host = remote.getGlobal('_host')
+            const port = remote.getGlobal('_port')
+            $("#data-host-server").text((host + ":" + port))
+            QRCode.toCanvas(canvas, (host + ":" + port), function (error) {
+                if (error) console.error('qr error: ', error)
+            })
+        }
     </script>
-    <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="js/qr-generator.js"></script>
+    <script id="templateNetworkInterface" type="text/template">
+        <a href="#" onclick="setIPServer('{{address}}')" class="list-interface  list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1">{{name}}</h5>
+              <small>{{family}}</small>
+            </div>
+            <div>{{address}}</div>
+            <div class="group-network-1">{{netmask}}</div>
+          </a>
+    </script>
+
+
 </body>
 
 </html>

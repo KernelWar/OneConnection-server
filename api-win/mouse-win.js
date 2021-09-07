@@ -58,9 +58,6 @@ const MOUSEEVENTF_WHEEL = 0x0800
 const SPEEDMOUSE = getSpeedMouse()
 
 
-timeFastTouch = 100
-timeSlowTouch = 0
-
 function moveScrollDown() {
     user32.mouse_event(MOUSEEVENTF_WHEEL, 0, 0, -20, 0);
 }
@@ -69,14 +66,15 @@ function moveScrollUp() {
 }
 
 function moveMouse(coords) {
+    //console.log(coords)
     //Tiempo mas rapido 1583
     let cursor = screen.getCursorScreenPoint()
     var x = cursor.x
     var y = cursor.y
     var ix = cursor.x
     var iy = cursor.y
-    if (coords.speed > 11.6 && coords.speed <= 67) {
-        s = 20 - parseInt((coords.speed * 20) / 67)
+    if (coords.speed > 11.6 && coords.speed <= 80) {
+        s = 20 - parseInt((coords.speed * 20) / 80)
         if (s == 0) {
             s = 1
         }
@@ -153,7 +151,7 @@ function setSpeedMouse(speed) {
 
 function getSpeedMouse() {
     var getSpeed = new Buffer(4)
-    var data = user32.SystemParametersInfoA(SPI_GETMOUSESPEED, 0, getSpeed, 0);
+    user32.SystemParametersInfoA(SPI_GETMOUSESPEED, 0, getSpeed, 0);
     getSpeed.type = ref.types.int
     //console.log("speed: ", getSpeed.deref())
     return getSpeed.deref()

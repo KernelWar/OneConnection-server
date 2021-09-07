@@ -11,3 +11,6 @@ $RECYCLE.BIN/
 
 /dist
 /node_modules
+/out
+/windows_installer
+config.js
