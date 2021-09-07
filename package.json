@@ -14,7 +14,7 @@
     "package-forge": "electron-forge package"
   },
   "author": "KernelWar",
-  "license": "ISC",
+  "license": "GNU v3",
   "build": {
     "asar": true,
     "asarUnpack": [
@@ -22,6 +22,7 @@
       "node_modules/wmi-client"
     ],
     "productName": "Control Kernel Server",
+
     "win": {
       "icon": "logo.png",
       "target": [
@@ -37,7 +38,8 @@
       "allowElevation": true,
       "allowToChangeInstallationDirectory": true,
       "oneClick": false,
-      "perMachine": true
+      "perMachine": true,
+      "license": "LICENSE"
     }
   },
   "config": {

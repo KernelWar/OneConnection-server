@@ -1,7 +1,7 @@
 const { MSICreator } = require('electron-wix-msi');
 const path = require('path');
 
-const APP_DIR = path.resolve(__dirname, './out/mouse-win32-x64');
+const APP_DIR = path.resolve(__dirname, './dist/win-unpacked');
 const OUT_DIR = path.resolve(__dirname, './windows_installer');
 
 const msiCreator = new MSICreator({
@@ -9,7 +9,7 @@ const msiCreator = new MSICreator({
     outputDirectory: OUT_DIR,
 
     description: 'Probando creacion de msi',
-    exe: 'CKS',
+    exe: 'Control Kernel Server',
     name: 'Control Kernel Server',
     manufacturer: 'KernelWar',
     version: '1.0.0',
