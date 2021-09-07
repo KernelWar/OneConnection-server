@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Control Kernel Server 0.2.0</title>
+    <title>OneConnection server 0.2.0</title>
 
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="css/index.css" />
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap-grid.min.css" />
-    
+
 </head>
 
 <body>
@@ -118,7 +118,7 @@
                         <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#hdd-network" />
                     </svg>
                     Puerto</a>
-                    <!--
+                <!--
                 <a id="item-update" class="dropdown-item  btn-sm" href="#">
                     <svg class="bi" width="16" height="16" fill="currentColor">
                         <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#cloud-check" />
@@ -200,7 +200,9 @@
         const QRCode = require('qrcode');
         const Mustache = require('mustache')
         const os = require("os")
-
+        var version = require('./../package.json').version
+        $('html head').find('title').text('OneConnection server v' + version);
+        $("#title-frame").text('OneConnection server v' + version)
         const { remote, ipcRenderer } = require("electron");
         generateQR()
         $("#wait-device").hide();

@@ -1,5 +1,5 @@
 {
-  "name": "mouse",
+  "name": "oneconnection-server",
   "version": "0.2.0",
   "description": "Server controlador de Windows",
   "main": "index.js",
@@ -16,8 +16,7 @@
       "config/",
       "node_modules/wmi-client"
     ],
-    "productName": "Control Kernel Server",
-
+    "productName": "OneConnection server",
     "win": {
       "icon": "logo.png",
       "target": [
