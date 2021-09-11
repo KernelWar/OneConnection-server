@@ -15,8 +15,8 @@ const { isIPv4 } = require('net')
 //console.log(process.env.ELECTRON_ENABLE_LOGGING)
 //process.env.NODE_ENV = "production"
 let gCONFIG = {
-    NODE_ENV: 'production'
-    //NODE_ENV: 'development'
+    //NODE_ENV: 'production'
+    NODE_ENV: 'development'
 }
 process.env.NODE_ENV = gCONFIG.NODE_ENV
 const iconPath = path.join(__dirname, '/logo.png')
@@ -28,7 +28,7 @@ socket.initServer(server)
 var host = ip.address()
 console.log('IP HOST -> ', host)
 var port = 8080
-let win
+var win
 let pathConfigServer
 let pathConfigFixDevice
 
@@ -74,8 +74,7 @@ fs.readFile(pathConfigServer, function (err, data) {
         appexpress.get('/', (req, res) => {
             res.send("API funcionando !!")
         })
-        server.listen(appexpress.get('port'), appexpress.get('host'), (error) => {
-            console.log(error)
+        server.listen(appexpress.get('port'), appexpress.get('host'), () => {
             console.log(`Server listening on ${host}:${port}`)
             //console.log("getMaxListeners -> ",server.getMaxListeners())
         })
