@@ -1,3 +1,17 @@
+/*
+//para detectar Error: spawn ENOENT
+(function() {
+    var childProcess = require("child_process");
+    var oldSpawn = childProcess.spawn;
+    function mySpawn() {
+        console.log('spawn called');
+        console.log(arguments);
+        var result = oldSpawn.apply(this, arguments);
+        return result;
+    }
+    childProcess.spawn = mySpawn;
+})();
+*/
 const environment = require('./environment/environment')
 const { app, BrowserWindow, nativeImage, ipcMain } = require('electron')
 
@@ -26,9 +40,11 @@ var host = ip.address()
 console.log('IP HOST -> ', host)
 var port = 8080
 var win
-let pathConfigServer
-let pathConfigFixDevice
+console.log(environment.env)
 
+var pathConfigServer = environment.env.pathConfigServer
+var pathConfigFixDevice = environment.env.pathConfigFixDevice
+/*
 if (process.env.NODE_ENV == 'production') {
     console.log("----PRODUCTION-----")
     global._pathApp = process.resourcesPath + "/app.asar.unpacked"
@@ -40,8 +56,7 @@ if (process.env.NODE_ENV == 'production') {
     pathConfigServer = (path.join(__dirname, 'config/configServer.json'))
     pathConfigFixDevice = (path.join(__dirname, 'config/fixDevice.json'))
 }
-
-
+*/
 fs.readFile(pathConfigServer, function (err, data) {
     if (err) {
         console.log(err)

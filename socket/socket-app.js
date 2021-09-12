@@ -16,7 +16,7 @@ let checkConnected = null
 let updateData = null
 let cpuMonitor = null
 const path = require('path')
-
+const environment = require('./../environment/environment')
 let query = 'SELECT CurrentBrightness,InstanceName FROM WmiMonitorBrightness';
 let wmi = new WmiClient({
     host: 'localhost',
@@ -216,10 +216,11 @@ function loadDevice(device) {
     let data
     let dir
     if (process.env.NODE_ENV == 'production') {
-        dir = process.resourcesPath + "/app.asar.unpacked/config/fixDevice.json"
+        //dir = process.resourcesPath + "/app.asar.unpacked/config/fixDevice.json"
     } else {
-        dir = (path.join(__dirname, '../config/fixDevice.json'))
+        //dir = (path.join(__dirname, '../config/fixDevice.json'))
     }
+    dir = environment.env.pathConfigFixDevice
     data = fs.readFileSync(dir)
     if (data.isNull()) {
         let objFixNull = {
@@ -296,7 +297,7 @@ function dataInit() {
         console.log("update data -> ", getTimeNow())
         io.emit("onVolume", volume.get())
 
-
+        console.log('ruta wmi-client -> ', global._pathApp + "/node_modules/wmi-client")
         //getBrightness
         wmi.cwd = global._pathApp + "/node_modules/wmi-client"
 
