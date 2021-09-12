@@ -13,4 +13,4 @@ $RECYCLE.BIN/
 /node_modules
 /out
 /windows_installer
-config.js
+/environment/environment.js

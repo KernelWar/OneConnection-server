@@ -1,3 +1,4 @@
+const environment = require('./environment/environment')
 const { app, BrowserWindow, nativeImage, ipcMain } = require('electron')
 
 const express = require('express')
@@ -14,11 +15,7 @@ const { isIPv4 } = require('net')
 
 //console.log(process.env.ELECTRON_ENABLE_LOGGING)
 //process.env.NODE_ENV = "production"
-let gCONFIG = {
-    //NODE_ENV: 'production'
-    NODE_ENV: 'development'
-}
-process.env.NODE_ENV = gCONFIG.NODE_ENV
+process.env.NODE_ENV = environment.env.NODE_ENV
 const iconPath = path.join(__dirname, '/logo.png')
 //server.maxConnections = 1
 //server.setMaxListeners = 2
@@ -32,7 +29,7 @@ var win
 let pathConfigServer
 let pathConfigFixDevice
 
-if (gCONFIG.NODE_ENV == 'production') {
+if (process.env.NODE_ENV == 'production') {
     console.log("----PRODUCTION-----")
     global._pathApp = process.resourcesPath + "/app.asar.unpacked"
     pathConfigServer = global._pathApp + "/config/configServer.json"
@@ -238,7 +235,7 @@ app.on('ready', () => {
     win.once('ready-to-show', () => {
         win.show()
     })
-    if (gCONFIG.NODE_ENV != 'production') {
+    if (process.env.NODE_ENV != 'production') {
         win.webContents.openDevTools()
     }
     /*
