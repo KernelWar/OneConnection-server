@@ -132,12 +132,7 @@ function listenMediaModule(socket) {
 function listenSesionModule(socket) {
 
     let commandCmd = null
-    console.log(process.env.NODE_ENV)
-    if (process.env.NODE_ENV == 'production') {
-        commandCmd = process.resourcesPath + "/app.asar.unpacked/config/displayOff.bat"
-    } else {
-        commandCmd = (path.join(__dirname, '../config/displayOff.bat'))
-    }
+    commandCmd = environment.env.global+ "/config/displayOff.bat"
 
     socket.on("offScreen", () => {
         let message = {
@@ -147,7 +142,7 @@ function listenSesionModule(socket) {
         }
         const cmd = require('node-cmd');
         let wait = new Promise((resolve, reject) => {
-            cmd.get("start /B " + commandCmd, function (err, data) {
+            cmd.get("start /B \"\" \"" + commandCmd+"\"", function (err, data) {
                 if (err) {
                     console.log(err)
                     message.error = true
@@ -215,11 +210,6 @@ function listenSesionModule(socket) {
 function loadDevice(device) {
     let data
     let dir
-    if (process.env.NODE_ENV == 'production') {
-        //dir = process.resourcesPath + "/app.asar.unpacked/config/fixDevice.json"
-    } else {
-        //dir = (path.join(__dirname, '../config/fixDevice.json'))
-    }
     dir = environment.env.pathConfigFixDevice
     data = fs.readFileSync(dir)
     if (data.isNull()) {
@@ -297,7 +287,7 @@ function dataInit() {
         console.log("update data -> ", getTimeNow())
         io.emit("onVolume", volume.get())
 
-        console.log('ruta wmi-client -> ', global._pathApp + "/node_modules/wmi-client")
+        //console.log('ruta wmi-client -> ', global._pathApp + "/node_modules/wmi-client")
         //getBrightness
         wmi.cwd = global._pathApp + "/node_modules/wmi-client"
 

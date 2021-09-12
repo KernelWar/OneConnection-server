@@ -26,13 +26,8 @@ const appexpress = express()
 let server = http.createServer(appexpress)
 let socket = require('./socket/socket-app')
 const { isIPv4 } = require('net')
-
-//console.log(process.env.ELECTRON_ENABLE_LOGGING)
-//process.env.NODE_ENV = "production"
 process.env.NODE_ENV = environment.env.NODE_ENV
 const iconPath = path.join(__dirname, '/logo.png')
-//server.maxConnections = 1
-//server.setMaxListeners = 2
 
 socket.initServer(server)
 
@@ -40,23 +35,10 @@ var host = ip.address()
 console.log('IP HOST -> ', host)
 var port = 8080
 var win
-console.log(environment.env)
 
 var pathConfigServer = environment.env.pathConfigServer
 var pathConfigFixDevice = environment.env.pathConfigFixDevice
-/*
-if (process.env.NODE_ENV == 'production') {
-    console.log("----PRODUCTION-----")
-    global._pathApp = process.resourcesPath + "/app.asar.unpacked"
-    pathConfigServer = global._pathApp + "/config/configServer.json"
-    pathConfigFixDevice = global._pathApp + "/config/fixDevice.json"
-} else {
-    console.log("----DEVELOPMENT-----")
-    global._pathApp = __dirname
-    pathConfigServer = (path.join(__dirname, 'config/configServer.json'))
-    pathConfigFixDevice = (path.join(__dirname, 'config/fixDevice.json'))
-}
-*/
+
 fs.readFile(pathConfigServer, function (err, data) {
     if (err) {
         console.log(err)
@@ -88,7 +70,6 @@ fs.readFile(pathConfigServer, function (err, data) {
         })
         server.listen(appexpress.get('port'), appexpress.get('host'), () => {
             console.log(`Server listening on ${host}:${port}`)
-            //console.log("getMaxListeners -> ",server.getMaxListeners())
         })
 
         appexpress.post("/requestConnection", function (res, req) {
@@ -112,27 +93,6 @@ fs.readFile(pathConfigServer, function (err, data) {
     }
 })
 
-//token 8651a90880760470f26ccdefd8b14f357048ed67
-/*
-autoUpdater.setFeedURL({
-    url: 'http://localhost/test-autoupdate/mouse-server-0.1.0/package.json'
-})
-autoUpdater.on('error', message => {
-    console.error('There was a problem updating the application')
-    console.error(message)
-})
-*/
-/*
-ipcMain.on("checkUpdate", (event) => {
-    console.log("CHECK UPDATE")
-    //autoUpdater.checkForUpdates()
-    require('update-electron-app')({
-        repo: 'KernelWar/mouse-server',
-        updateInterval: '5 minutes',
-        logger: require('electron-log')
-      })
-})
-*/
 ipcMain.on("setHost", (event, newhost) => {
     global._host = newhost;
     appexpress.set('host', newhost)
