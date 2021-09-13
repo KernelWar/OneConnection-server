@@ -1,3 +1,18 @@
+/*
+//para detectar Error: spawn ENOENT
+(function() {
+    var childProcess = require("child_process");
+    var oldSpawn = childProcess.spawn;
+    function mySpawn() {
+        console.log('spawn called');
+        console.log(arguments);
+        var result = oldSpawn.apply(this, arguments);
+        return result;
+    }
+    childProcess.spawn = mySpawn;
+})();
+*/
+const environment = require('./environment/environment')
 const { app, BrowserWindow, nativeImage, ipcMain } = require('electron')
 
 const express = require('express')
@@ -11,39 +26,18 @@ const appexpress = express()
 let server = http.createServer(appexpress)
 let socket = require('./socket/socket-app')
 const { isIPv4 } = require('net')
-
-//console.log(process.env.ELECTRON_ENABLE_LOGGING)
-//process.env.NODE_ENV = "production"
-let gCONFIG = {
-    NODE_ENV: 'production'
-    //NODE_ENV: 'development'
-}
-process.env.NODE_ENV = gCONFIG.NODE_ENV
+process.env.NODE_ENV = environment.env.NODE_ENV
 const iconPath = path.join(__dirname, '/logo.png')
-//server.maxConnections = 1
-//server.setMaxListeners = 2
 
 socket.initServer(server)
 
 var host = ip.address()
 console.log('IP HOST -> ', host)
 var port = 8080
-let win
-let pathConfigServer
-let pathConfigFixDevice
+var win
 
-if (gCONFIG.NODE_ENV == 'production') {
-    console.log("----PRODUCTION-----")
-    global._pathApp = process.resourcesPath + "/app.asar.unpacked"
-    pathConfigServer = global._pathApp + "/config/configServer.json"
-    pathConfigFixDevice = global._pathApp + "/config/fixDevice.json"
-} else {
-    console.log("----DEVELOPMENT-----")
-    global._pathApp = __dirname
-    pathConfigServer = (path.join(__dirname, 'config/configServer.json'))
-    pathConfigFixDevice = (path.join(__dirname, 'config/fixDevice.json'))
-}
-
+var pathConfigServer = environment.env.pathConfigServer
+var pathConfigFixDevice = environment.env.pathConfigFixDevice
 
 fs.readFile(pathConfigServer, function (err, data) {
     if (err) {
@@ -74,10 +68,8 @@ fs.readFile(pathConfigServer, function (err, data) {
         appexpress.get('/', (req, res) => {
             res.send("API funcionando !!")
         })
-        server.listen(appexpress.get('port'), appexpress.get('host'), (error) => {
-            console.log(error)
+        server.listen(appexpress.get('port'), appexpress.get('host'), () => {
             console.log(`Server listening on ${host}:${port}`)
-            //console.log("getMaxListeners -> ",server.getMaxListeners())
         })
 
         appexpress.post("/requestConnection", function (res, req) {
@@ -101,27 +93,6 @@ fs.readFile(pathConfigServer, function (err, data) {
     }
 })
 
-//token 8651a90880760470f26ccdefd8b14f357048ed67
-/*
-autoUpdater.setFeedURL({
-    url: 'http://localhost/test-autoupdate/mouse-server-0.1.0/package.json'
-})
-autoUpdater.on('error', message => {
-    console.error('There was a problem updating the application')
-    console.error(message)
-})
-*/
-/*
-ipcMain.on("checkUpdate", (event) => {
-    console.log("CHECK UPDATE")
-    //autoUpdater.checkForUpdates()
-    require('update-electron-app')({
-        repo: 'KernelWar/mouse-server',
-        updateInterval: '5 minutes',
-        logger: require('electron-log')
-      })
-})
-*/
 ipcMain.on("setHost", (event, newhost) => {
     global._host = newhost;
     appexpress.set('host', newhost)
@@ -239,7 +210,7 @@ app.on('ready', () => {
     win.once('ready-to-show', () => {
         win.show()
     })
-    if (gCONFIG.NODE_ENV != 'production') {
+    if (process.env.NODE_ENV != 'production') {
         win.webContents.openDevTools()
     }
     /*

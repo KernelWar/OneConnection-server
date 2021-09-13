@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>OneConnection server 0.2.0</title>
+    <title>OneConnection server</title>
 
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
@@ -18,7 +18,7 @@
 <body>
     <div id="content-full">
         <div id="controls-frame">
-            <div id="title-frame">Control Kernel Server</div>
+            <div id="title-frame">OneConnection server</div>
             <div class="btn-group" role="group" aria-label="controls">
                 <button id="btn-minimizade" type="button" class="btn btn-light">
                     <img src="../node_modules/bootstrap-icons/icons/dash.svg" />
@@ -268,6 +268,7 @@
             let newPort = $("#port-server").val()
             newPort = parseInt(newPort)
             if (newPort == 80 || newPort >= 1024 && newPort <= 49151) {
+                ipcRenderer.send('desconectClient')
                 ipcRenderer.send('setPort', newPort)
                 generateQR()
                 ipcRenderer.send('resetSocketServer')
@@ -295,6 +296,7 @@
         })
 
         function setIPServer(newip) {
+            ipcRenderer.send('desconectClient')
             ipcRenderer.send('setHost', newip)
             generateQR()
             $('#interfaceNetworkModdal').modal('toggle')
