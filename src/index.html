@@ -134,7 +134,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">Seleccione interfaz de red</h5>
-                    
+
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -177,7 +177,8 @@
                                     pattern="/^([0-9])*$/" class="form-control" type="text">
                             </div>
                             <p style="font-size: 12px;">
-                                <strong>Puertos del 1024 al 49151:</strong> Son los puertos registrados, los que se utilizan por las aplicaciones y los juegos que instales en el ordenador. 
+                                <strong>Puertos del 1024 al 49151:</strong> Son los puertos registrados, los que se
+                                utilizan por las aplicaciones y los juegos que instales en el ordenador.
                             </p>
                         </div>
                         <div class="text-right">
@@ -198,19 +199,56 @@
             </div>
         </div>
     </div>
-
+    <video id="video-stream" style="display:none;visibility:hidden; width:0;height:0;" width="800" autoplay></video>
+    <canvas id="preview" style="display:none;visibility:hidden; width:0;height:0;" width="800" height="600"></canvas>
     <script>
         window.jQuery = window.$ = require("jquery");
     </script>
     <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+    <script>        
+        var canvas = document.getElementById("preview");
+        var context = canvas.getContext('2d');
+        var video = document.getElementById("video-stream")
         const QRCode = require('qrcode');
         const Mustache = require('mustache')
         const os = require("os")
         var version = require('./../package.json').version
         $('html head').find('title').text('OneConnection server v' + version);
         $("#title-frame").text('OneConnection server v' + version)
-        const { remote, ipcRenderer } = require("electron");
+        const { remote, ipcRenderer, ipcMain } = require("electron");
+        var frameStream = null
+        ipcRenderer.on("activateStream", (event, source) => {
+            const constraints = {
+                audio: false,
+                video: {
+                    mandatory: {
+                        chromeMediaSource: 'desktop',
+                        chromeMediaSourceId: source.id,
+                        maxHeight: 800,
+                        maxWidth: 600
+                    }
+                }
+            };
+
+            var stream = navigator.mediaDevices.getUserMedia(constraints)
+            stream.then(async mediaStream => {
+                //var video = document.createElement('video');                                
+                video.srcObject = mediaStream                
+                //video.play()
+                var frames = 100
+                frameStream = setInterval(()=>{
+                    //console.log('-> Get rendere stream')
+                    //context.drawImage(video, 0, 0, 800, 600);
+                    context.drawImage(video, 0, 0, 800 , 600);
+                    ipcRenderer.send("onDataStream", canvas.toDataURL('image/webp'))                 
+                },10)
+                
+            })
+        });
+        ipcRenderer.on("stopStream", (event)=>{
+            //console.log('-> Stop stream')
+            clearInterval(frameStream)
+        })
         generateQR()
         $("#wait-device").hide();
         $("#device-info").hide();
