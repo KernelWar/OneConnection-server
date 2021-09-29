@@ -7,15 +7,16 @@ const battery = require('battery-level')
 const directories = require("../api-win/directories-win")
 const shorcutsMedia = require("../api-win/shortcuts-media-win")
 const session = require("../api-win/session-win")
+const screen = require('../api-win/screen')
 const os = require('os')
 const fs = require('fs')
 const os_utils = require('os-utils');
+const { ipcMain } = require("electron");
 let io = null
 //Monitores
 let checkConnected = null
 let updateData = null
 let cpuMonitor = null
-const path = require('path')
 const environment = require('./../environment/environment')
 let query = 'SELECT CurrentBrightness,InstanceName FROM WmiMonitorBrightness';
 let wmi = new WmiClient({
@@ -132,7 +133,7 @@ function listenMediaModule(socket) {
 function listenSesionModule(socket) {
 
     let commandCmd = null
-    commandCmd = environment.env.global+ "/config/displayOff.bat"
+    commandCmd = environment.env.global + "/config/displayOff.bat"
 
     socket.on("offScreen", () => {
         let message = {
@@ -142,7 +143,7 @@ function listenSesionModule(socket) {
         }
         const cmd = require('node-cmd');
         let wait = new Promise((resolve, reject) => {
-            cmd.get("start /B \"\" \"" + commandCmd+"\"", function (err, data) {
+            cmd.get("start /B \"\" \"" + commandCmd + "\"", function (err, data) {
                 if (err) {
                     console.log(err)
                     message.error = true
@@ -257,6 +258,40 @@ function loadDevice(device) {
         console.log("fix null")
     }
 }
+function listenScreen(socket) {
+    socket.on("getScreens", () => {
+        screen.getVideoSources().then(data => {
+            data.map(item => {
+                item.thumbnail = item.thumbnail.toDataURL()
+            })
+            io.emit("onScreens", data)
+        })
+    })
+    socket.on("onActivateStream", (source) => {
+        ipcMain.emit("activateStreamWebContent", source)
+        //console.log(source)
+        //ipcMain.emit("initStream", source)
+    })
+
+    socket.on("getDataStream", () => {
+        ipcMain.emit("getDataStreamWebContent")
+    })
+
+    ipcMain.on("onDataStream", (event, data) => {
+        if(clientConnected() == false){
+            console.log('-> STOP -> [exit app]')
+            ipcMain.emit("finalizeStreamWebContent")
+        }else{            
+            io.emit("streamLive", data)
+        }
+    });
+    socket.on("stopStream", () => {
+        ipcMain.emit("stopStreamWebContent")
+    })
+    socket.on("finalizeStream", () => {
+        ipcMain.emit("finalizeStreamWebContent")
+    })
+}
 
 function listenInConnection() {
     io.on("connection", socket => {
@@ -275,6 +310,7 @@ function listenInConnection() {
         listenDirectoryModule(socket)
         listenMediaModule(socket)
         listenSesionModule(socket)
+        listenScreen(socket)
 
     });
 
@@ -345,4 +381,12 @@ function getTimeNow() {
     let time = "[" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "]"
     return time
 }
-module.exports = { initServer, listenInConnect, listenInConnection, deleteSocketServer, clientConnected, getTimeNow, desconectedClient }
+module.exports = {
+    initServer,
+    listenInConnect,
+    listenInConnection,
+    deleteSocketServer,
+    clientConnected,
+    getTimeNow,
+    desconectedClient
+}

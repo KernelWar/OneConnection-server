@@ -13,7 +13,7 @@
 })();
 */
 const environment = require('./environment/environment')
-const { app, BrowserWindow, nativeImage, ipcMain } = require('electron')
+const { app, BrowserWindow, nativeImage, ipcMain, ipcRenderer } = require('electron')
 
 const express = require('express')
 const http = require('http')
@@ -93,6 +93,7 @@ fs.readFile(pathConfigServer, function (err, data) {
     }
 })
 
+
 ipcMain.on("setHost", (event, newhost) => {
     global._host = newhost;
     appexpress.set('host', newhost)
@@ -153,6 +154,7 @@ ipcMain.on("closeAll", (event) => {
     win.close()
 });
 
+
 function removeDevice() {
     global._system = null
     global._device = null
@@ -187,6 +189,26 @@ function resetSocketServer() {
 
 }
 
+//Eventos main process
+ipcMain.on("getDataStreamWebContent", (source) => {
+    win.webContents.send("getDataStream", source)
+})
+
+ipcMain.on("activateStreamWebContent", (source) => {
+    console.log('-> Activate stream')
+    win.webContents.send("activateStream", source)
+})
+
+ipcMain.on("stopStreamWebContent", () => {
+    console.log('-> Stop stream')
+    win.webContents.send("stopStream")
+})
+
+ipcMain.on("finalizeStreamWebContent", () => {
+    console.log('-> Finalize stream')
+    win.webContents.send("finalizeStream")
+})
+
 
 app.on('ready', () => {
     win = new BrowserWindow({
@@ -209,6 +231,7 @@ app.on('ready', () => {
     win.setIcon(nativeImage.createFromPath(iconPath))
     win.once('ready-to-show', () => {
         win.show()
+        //win.webContents.send("hola")
     })
     if (process.env.NODE_ENV != 'production') {
         win.webContents.openDevTools()
