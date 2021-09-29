@@ -260,31 +260,36 @@ function loadDevice(device) {
 }
 function listenScreen(socket) {
     socket.on("getScreens", () => {
-        screen.getVideoSources().then(async data => {
+        screen.getVideoSources().then(data => {
             data.map(item => {
-                try {
-                    console.log(navigator.mediaDevices)
-                } catch (error) {
-
-                }
                 item.thumbnail = item.thumbnail.toDataURL()
             })
             io.emit("onScreens", data)
         })
     })
-    socket.on("onScreenSelected", (source) => {
+    socket.on("onActivateStream", (source) => {
         ipcMain.emit("activateStreamWebContent", source)
+        //console.log(source)
+        //ipcMain.emit("initStream", source)
     })
+
+    socket.on("getDataStream", () => {
+        ipcMain.emit("getDataStreamWebContent")
+    })
+
     ipcMain.on("onDataStream", (event, data) => {
-        if(io.engine.clientsCount == 0){
+        if(clientConnected() == false){
             console.log('-> STOP -> [exit app]')
-            ipcMain.emit("stopStreamWebContent")
+            ipcMain.emit("finalizeStreamWebContent")
         }else{            
             io.emit("streamLive", data)
         }
     });
     socket.on("stopStream", () => {
         ipcMain.emit("stopStreamWebContent")
+    })
+    socket.on("finalizeStream", () => {
+        ipcMain.emit("finalizeStreamWebContent")
     })
 }
 

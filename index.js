@@ -190,6 +190,10 @@ function resetSocketServer() {
 }
 
 //Eventos main process
+ipcMain.on("getDataStreamWebContent", (source) => {
+    win.webContents.send("getDataStream", source)
+})
+
 ipcMain.on("activateStreamWebContent", (source) => {
     console.log('-> Activate stream')
     win.webContents.send("activateStream", source)
@@ -198,6 +202,11 @@ ipcMain.on("activateStreamWebContent", (source) => {
 ipcMain.on("stopStreamWebContent", () => {
     console.log('-> Stop stream')
     win.webContents.send("stopStream")
+})
+
+ipcMain.on("finalizeStreamWebContent", () => {
+    console.log('-> Finalize stream')
+    win.webContents.send("finalizeStream")
 })
 
 

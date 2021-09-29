@@ -199,13 +199,13 @@
             </div>
         </div>
     </div>
-    <video id="video-stream" style="display:none;visibility:hidden; width:0;height:0;" width="800" autoplay></video>
-    <canvas id="preview" style="display:none;visibility:hidden; width:0;height:0;" width="800" height="600"></canvas>
+    <video id="video-stream" style="display:none;visibility:hidden; width:0;height:0;" width="1000" autoplay></video>
+    <canvas id="preview" style="display:none;visibility:hidden; width:0;height:0;" width="1000" height="800"></canvas>
     <script>
         window.jQuery = window.$ = require("jquery");
     </script>
     <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script>        
+    <script>
         var canvas = document.getElementById("preview");
         var context = canvas.getContext('2d');
         var video = document.getElementById("video-stream")
@@ -216,38 +216,60 @@
         $('html head').find('title').text('OneConnection server v' + version);
         $("#title-frame").text('OneConnection server v' + version)
         const { remote, ipcRenderer, ipcMain } = require("electron");
-        var frameStream = null
-        ipcRenderer.on("activateStream", (event, source) => {
-            const constraints = {
-                audio: false,
-                video: {
-                    mandatory: {
-                        chromeMediaSource: 'desktop',
-                        chromeMediaSourceId: source.id,
-                        maxHeight: 800,
-                        maxWidth: 600
-                    }
+        var frameStream
+        var stream = null
+        var streamActive = false
+        var constraints = {
+            audio: false,
+            video: {
+                mandatory: {
+                    chromeMediaSource: 'desktop',
+                    chromeMediaSourceId: null,
+                    maxWidth: 1000,
+                    maxHeight: 800
                 }
-            };
-
-            var stream = navigator.mediaDevices.getUserMedia(constraints)
-            stream.then(async mediaStream => {
-                //var video = document.createElement('video');                                
-                video.srcObject = mediaStream                
-                //video.play()
-                var frames = 100
-                frameStream = setInterval(()=>{
-                    //console.log('-> Get rendere stream')
-                    //context.drawImage(video, 0, 0, 800, 600);
-                    context.drawImage(video, 0, 0, 800 , 600);
-                    ipcRenderer.send("onDataStream", canvas.toDataURL('image/webp'))                 
-                },10)
-                
+            }
+        };
+        var frames = null
+        ipcRenderer.on("activateStream", (event, source) => {
+            //console.log('source.id : ', source.id, ' | chromeMediaSourceId: ', constraints.video.mandatory.chromeMediaSourceId)
+            streamActive = false
+            if (source.id != constraints.video.mandatory.chromeMediaSourceId) {
+                console.log('Init stream')
+                constraints.video.mandatory.chromeMediaSourceId = source.id
+            } else {
+                console.log("Resume stream")
+            }
+            stream = navigator.mediaDevices.getUserMedia(constraints)
+            stream.then(mediaStream => {
+                video.srcObject = mediaStream
+                context.drawImage(video, 0, 0, 1000, 800);
+                streamActive = true
             })
         });
-        ipcRenderer.on("stopStream", (event)=>{
-            //console.log('-> Stop stream')
-            clearInterval(frameStream)
+
+        ipcRenderer.on("getDataStream", (event) => {
+            frames = setInterval(() => {
+                if (streamActive) {
+                    //console.log('send data stream ...')
+                    context.drawImage(video, 0, 0, 1000, 800);
+                    ipcRenderer.send("onDataStream", canvas.toDataURL('image/webp', 0.7))
+                }
+            }, 10)
+        })
+
+        ipcRenderer.on("stopStream", (event) => {
+            clearInterval(frames)
+        })
+
+        ipcRenderer.on("finalizeStream", (event) => {
+            let tracks = video.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+            stream.srcObject = null;
+            //video.pause()
+            //video.currentTime = 0
+            clearInterval(frames)
+            streamActive = false
         })
         generateQR()
         $("#wait-device").hide();
