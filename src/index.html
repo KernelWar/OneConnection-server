@@ -106,6 +106,9 @@
                     <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#gear-fill" />
                 </svg> Configuración
             </button>
+            <div id="info-update">
+                <label id="text-info-update"></label>
+            </div>
             <div class="dropdown-menu">
                 <a id="item-network" class="dropdown-item  btn-sm" href="#" data-toggle="modal"
                     data-target="#interfaceNetworkModdal">
@@ -118,13 +121,11 @@
                         <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#hdd-network" />
                     </svg>
                     Puerto</a>
-                <!--
-                <a id="item-update" class="dropdown-item  btn-sm" href="#">
+                <a id="item-update" class="dropdown-item  btn-sm" href="#" onclick="checkUpdate()">
                     <svg class="bi" width="16" height="16" fill="currentColor">
                         <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#cloud-check" />
                     </svg>
                     Buscar actualizaciones</a>
-                    -->
             </div>
         </div>
     </div>
@@ -271,6 +272,17 @@
             clearInterval(frames)
             streamActive = false
         })
+
+        //AUTOUPDATE
+        //Recive el estado del proceso de autoupdate
+        ipcRenderer.on("status-update", (event, text) => {
+            document.getElementById("text-info-update").innerHTML = text 
+        })
+
+        function checkUpdate(){
+            ipcRenderer.send("checkUpdateApp")
+        }
+
         generateQR()
         $("#wait-device").hide();
         $("#device-info").hide();
@@ -383,8 +395,6 @@
             <div class="group-network-1">{{netmask}}</div>
           </a>
     </script>
-
-
 </body>
 
 </html>

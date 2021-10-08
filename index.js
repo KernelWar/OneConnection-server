@@ -14,6 +14,13 @@
 */
 const environment = require('./environment/environment')
 const { app, BrowserWindow, nativeImage, ipcMain, ipcRenderer } = require('electron')
+const log = require('electron-log');
+const { autoUpdater } = require("electron-updater");
+
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = 'info';
+log.info('App starting...');
+
 
 const express = require('express')
 const http = require('http')
@@ -210,6 +217,12 @@ ipcMain.on("finalizeStreamWebContent", () => {
 })
 
 
+ipcMain.on("checkUpdateApp", () => {
+    autoUpdater.checkForUpdatesAndNotify();
+})
+ 
+
+
 app.on('ready', () => {
     win = new BrowserWindow({
         width: 360,
@@ -218,7 +231,8 @@ app.on('ready', () => {
         webPreferences: {
             nodeIntegration: true,
             //nodeIntegrationInWorker: true,
-            enableRemoteModule: true
+            enableRemoteModule: true,
+            contextIsolation: false
         },
         transparent: true,
         frame: false,
@@ -236,6 +250,7 @@ app.on('ready', () => {
     if (process.env.NODE_ENV != 'production') {
         win.webContents.openDevTools()
     }
+    autoUpdater.checkForUpdatesAndNotify();
     /*
         let tray = new Tray(iconPath)
         const ctx = Menu.buildFromTemplate([
@@ -268,3 +283,39 @@ app.on('ready', () => {
         tray.setContextMenu(ctx)
         */
 })
+
+function sendStatusToWindow(text) {
+    console.log(text)
+    win.webContents.send("status-update", text);
+}
+
+autoUpdater.on('checking-for-update', () => {
+    sendStatusToWindow('Checking for update...');
+})
+autoUpdater.on('update-available', (info) => {
+    sendStatusToWindow('Update available.');
+    log.info('info', info);
+})
+autoUpdater.on('update-not-available', (info) => {
+    sendStatusToWindow('Update not available.');
+    log.info('info', info);
+})
+autoUpdater.on('error', (err) => {
+    sendStatusToWindow('Error in auto-updater. ' + err);
+    log.info('err', err);
+})
+autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    sendStatusToWindow(log_message);
+    log.info('progressObj', progressObj);
+})
+autoUpdater.on('update-downloaded', (info) => {
+    sendStatus('Update downloaded.  Will quit and install in 5 seconds.');
+    log.info('info', info);
+    // Wait 5 seconds, then quit and install
+    setTimeout(function() {
+      autoUpdater.quitAndInstall();  
+    }, 5000)
+});

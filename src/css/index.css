@@ -101,6 +101,18 @@ html, body{
 #btns-configuration svg{
     margin-top: -2px;
 }
+
+#info-update{
+    width: 100%;
+    color: #fff;
+    text-align: right;
+    font-size: 12px;
+    display: grid;
+    align-items: center;
+    padding-right: 10px;
+}
+
+
 .list-interface .group-network-1{
     margin-top: -5px !important;
     font-size: small;
