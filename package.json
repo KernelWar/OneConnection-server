@@ -1,14 +1,20 @@
 {
   "name": "oneconnection-server",
-  "version": "0.4.0",
+  "version": "v0.3.2",
   "description": "Server controlador de Windows",
   "main": "index.js",
   "scripts": {
     "start": "copy \"environment\\environment.dev.js\" \"environment\\environment.js\" && electron .",
-    "dist": "copy \"environment\\environment.prod.js\" \"environment\\environment.js\" && electron-builder"
+    "dist": "copy \"environment\\environment.prod.js\" \"environment\\environment.js\" && electron-builder",
+    "build": "copy \"environment\\environment.prod.js\" \"environment\\environment.js\" && electron-builder build --win --publish never",
+    "deploy": "copy \"environment\\environment.prod.js\" \"environment\\environment.js\" && electron-builder build --win --publish always"
   },
   "author": "KernelWar",
   "license": "GNU v3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KernelWar/OneConnection-server.git"
+  },
   "build": {
     "asar": true,
     "asarUnpack": [
@@ -32,8 +38,6 @@
           "provider": "github",
           "repo": "OneConnection-server",
           "owner": "KernelWar",
-          "host": "github.com",
-          "protocol": "https",
           "releaseType": "release"
         }
       ]

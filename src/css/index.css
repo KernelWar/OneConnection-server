@@ -88,10 +88,12 @@ html, body{
     position: absolute;
     bottom: 0;    
     padding: 5px;
+    padding-bottom: 10px;
     width: 100%;
     
 }
 #btns-configuration .btn-group{
+    width: 100%;
     padding: 0 !important;
     margin: 0 !important;
 }
@@ -105,10 +107,11 @@ html, body{
 #info-update{
     width: 100%;
     color: #fff;
-    text-align: right;
-    font-size: 12px;
+    font-size: 10px;
     display: grid;
-    align-items: center;
+    align-items: center;  
+    text-align: right;
+    line-height: 12px;
     padding-right: 10px;
 }
 

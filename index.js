@@ -250,7 +250,7 @@ app.on('ready', () => {
     if (process.env.NODE_ENV != 'production') {
         win.webContents.openDevTools()
     }
-    autoUpdater.checkForUpdatesAndNotify();
+    //autoUpdater.checkForUpdatesAndNotify();
     /*
         let tray = new Tray(iconPath)
         const ctx = Menu.buildFromTemplate([
@@ -289,30 +289,46 @@ function sendStatusToWindow(text) {
     win.webContents.send("status-update", text);
 }
 
+function bytesToMegaBytes(bytes) { 
+    return (bytes / 1e-6).toFixed(2); 
+  }
+
 autoUpdater.on('checking-for-update', () => {
-    sendStatusToWindow('Checking for update...');
+    sendStatusToWindow('Buscando actualizaciones...');
 })
 autoUpdater.on('update-available', (info) => {
-    sendStatusToWindow('Update available.');
+    sendStatusToWindow('Hay una nueva versión');
     log.info('info', info);
 })
 autoUpdater.on('update-not-available', (info) => {
-    sendStatusToWindow('Update not available.');
+    sendStatusToWindow('No hay actualizaciones');
     log.info('info', info);
 })
 autoUpdater.on('error', (err) => {
-    sendStatusToWindow('Error in auto-updater. ' + err);
+    sendStatusToWindow('Error al actualizar');
     log.info('err', err);
 })
+
 autoUpdater.on('download-progress', (progressObj) => {
-    let log_message = "Download speed: " + progressObj.bytesPerSecond;
-    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    var speed = 0
+    var textSpeed = ""
+    if(progressObj.bytesPerSecond > 1024 * 1024){
+        speed = progressObj.bytesPerSecond / 1024 / 1024        
+        speed = speed.toFixed(2)
+        textSpeed = speed + " Mb/s"
+    }else{
+        speed = progressObj.bytesPerSecond / 1024        
+        speed = speed.toFixed(2)
+        textSpeed = speed + " Kb/s"
+    }    
+    let log_message = textSpeed;
+    log_message += "<br>"+(progressObj.percent).toFixed(2) + '%';
+    log_message = "<br>"+log_message + ' (' + (progressObj.transferred / 1024 / 1024 ).toFixed(2) + "Mb/" + (progressObj.total / 1024 / 1024 ).toFixed(2) + 'Mb)';
     sendStatusToWindow(log_message);
-    log.info('progressObj', progressObj);
+    //log.info('progressObj', progressObj);
 })
 autoUpdater.on('update-downloaded', (info) => {
-    sendStatus('Update downloaded.  Will quit and install in 5 seconds.');
+    sendStatusToWindow('Descarga finalizada');
     log.info('info', info);
     // Wait 5 seconds, then quit and install
     setTimeout(function() {
