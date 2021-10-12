@@ -28,7 +28,9 @@ const ip = require('ip')
 const cors = require('cors')
 const fs = require('fs')
 
+const url = require('url')
 const path = require('path')
+
 const appexpress = express()
 let server = http.createServer(appexpress)
 let socket = require('./socket/socket-app')
@@ -220,78 +222,85 @@ ipcMain.on("finalizeStreamWebContent", () => {
 ipcMain.on("checkUpdateApp", () => {
     autoUpdater.checkForUpdatesAndNotify();
 })
- 
 
+const instances = app.requestSingleInstanceLock()
 
-app.on('ready', () => {
-    win = new BrowserWindow({
-        width: 360,
-        height: 600,
-        resizable: false,
-        webPreferences: {
-            nodeIntegration: true,
-            //nodeIntegrationInWorker: true,
-            enableRemoteModule: true,
-            contextIsolation: false
-        },
-        transparent: true,
-        frame: false,
-        center: true,
-        maximizable: false,
-        show: false
-    })
-    win.loadFile('src/index.html')
-    win.removeMenu()
-    win.setIcon(nativeImage.createFromPath(iconPath))
-    win.once('ready-to-show', () => {
-        win.show()
-        //win.webContents.send("hola")
-    })
-    if (process.env.NODE_ENV != 'production') {
-        win.webContents.openDevTools()
-    }
-    //autoUpdater.checkForUpdatesAndNotify();
-    /*
-        let tray = new Tray(iconPath)
-        const ctx = Menu.buildFromTemplate([
-            {
-                label: 'Ver conexión',
-                type: 'normal',
-                click: () => {
-                    win.show()
-                }
+if (instances == false) {
+    app.exit()
+} else {
+
+    app.on('ready', () => {
+        win = new BrowserWindow({
+            width: 360,
+            height: 600,
+            resizable: false,
+            webPreferences: {
+                nodeIntegration: true,
+                //nodeIntegrationInWorker: true,
+                enableRemoteModule: true,
+                contextIsolation: false
             },
-            {
-                label: 'Reiniciar app',
-                type: 'normal',
-                click: () => {
-                    resetSocketServer()
-                    app.relaunch()
-                    app.quit()
+            transparent: true,
+            frame: false,
+            center: true,
+            maximizable: false,
+            show: false
+        })
+        //win.loadFile('src/index.html')
+        win.loadURL(url.format({
+            pathname: path.join(__dirname, "src/index.html"),
+            protocol: 'file',
+            slashes: true
+        }))
+        win.removeMenu()
+        win.setIcon(nativeImage.createFromPath(iconPath))
+        win.once('ready-to-show', () => {
+            win.show()
+            //win.webContents.send("hola")
+        })
+        if (process.env.NODE_ENV != 'production') {
+            win.webContents.openDevTools()
+        }
+        //autoUpdater.checkForUpdatesAndNotify();
+        /*
+            let tray = new Tray(iconPath)
+            const ctx = Menu.buildFromTemplate([
+                {
+                    label: 'Ver conexión',
+                    type: 'normal',
+                    click: () => {
+                        win.show()
+                    }
+                },
+                {
+                    label: 'Reiniciar app',
+                    type: 'normal',
+                    click: () => {
+                        resetSocketServer()
+                        app.relaunch()
+                        app.quit()
+                    }
+                },
+                { type: 'separator' },
+                {
+                    label: 'Cerrar todo',
+                    type: 'normal',
+                    click: () => {
+                        server.close()
+                        app.exit()
+                    }
                 }
-            },
-            { type: 'separator' },
-            {
-                label: 'Cerrar todo',
-                type: 'normal',
-                click: () => {
-                    server.close()
-                    app.exit()
-                }
-            }
-        ])
-        tray.setContextMenu(ctx)
-        */
-})
+            ])
+            tray.setContextMenu(ctx)
+            */
+    })
+
+}
 
 function sendStatusToWindow(text) {
     console.log(text)
     win.webContents.send("status-update", text);
 }
-
-function bytesToMegaBytes(bytes) { 
-    return (bytes / 1e-6).toFixed(2); 
-  }
 
 autoUpdater.on('checking-for-update', () => {
     sendStatusToWindow('Buscando actualizaciones...');
@@ -305,25 +314,25 @@ autoUpdater.on('update-not-available', (info) => {
     log.info('info', info);
 })
 autoUpdater.on('error', (err) => {
-    sendStatusToWindow('Error al actualizar');
+    sendStatusToWindow('No se pudo actualizar');
     log.info('err', err);
 })
 
 autoUpdater.on('download-progress', (progressObj) => {
     var speed = 0
     var textSpeed = ""
-    if(progressObj.bytesPerSecond > 1024 * 1024){
-        speed = progressObj.bytesPerSecond / 1024 / 1024        
+    if (progressObj.bytesPerSecond > 1024 * 1024) {
+        speed = progressObj.bytesPerSecond / 1024 / 1024
         speed = speed.toFixed(2)
         textSpeed = speed + " Mb/s"
-    }else{
-        speed = progressObj.bytesPerSecond / 1024        
+    } else {
+        speed = progressObj.bytesPerSecond / 1024
         speed = speed.toFixed(2)
         textSpeed = speed + " Kb/s"
-    }    
+    }
     let log_message = textSpeed;
-    log_message += "<br>"+(progressObj.percent).toFixed(2) + '%';
-    log_message = "<br>"+log_message + ' (' + (progressObj.transferred / 1024 / 1024 ).toFixed(2) + "Mb/" + (progressObj.total / 1024 / 1024 ).toFixed(2) + 'Mb)';
+    log_message += "<br>" + (progressObj.percent).toFixed(2) + '%';
+    log_message = "<br>" + log_message + ' (' + (progressObj.transferred / 1024 / 1024).toFixed(2) + "Mb/" + (progressObj.total / 1024 / 1024).toFixed(2) + 'Mb)';
     sendStatusToWindow(log_message);
     //log.info('progressObj', progressObj);
 })
@@ -331,7 +340,7 @@ autoUpdater.on('update-downloaded', (info) => {
     sendStatusToWindow('Descarga finalizada');
     log.info('info', info);
     // Wait 5 seconds, then quit and install
-    setTimeout(function() {
-      autoUpdater.quitAndInstall();  
+    setTimeout(function () {
+        autoUpdater.quitAndInstall();
     }, 5000)
 });
