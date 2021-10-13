@@ -43,7 +43,8 @@
         <div id="content-device" class="container">
             <div id="device-info" class="row">
                 <div class="col-12">
-                    <div class="card text-center text-white bg-dark" style="background: #1e233e !important; border: none !important;">
+                    <div class="card text-center text-white bg-dark"
+                        style="background: #1e233e !important; border: none !important;">
                         <div id="header-card" class="card-header">
                             <div id="title-header-card">Dispositivo</div>
                             <button id="btn-delete-device" type="button"
@@ -77,7 +78,8 @@
             </div>
             <div id="wait-device" class="row">
                 <div class="col-12">
-                    <div class="card text-center text-white bg-dark" style="background: #1e233e !important; border: none !important;">
+                    <div class="card text-center text-white bg-dark"
+                        style="background: #1e233e !important; border: none !important;">
                         <div class="card-header ">Estado</div>
                         <div class="card-body">
                             <span class="badge badge-danger">Esperando conexión</span>
@@ -127,6 +129,11 @@
                         <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#cloud-check" />
                     </svg>
                     Buscar actualizaciones</a>
+                <a id="item-donate" class="dropdown-item  btn-sm" href="#" onclick="openPayPal()">
+                    <svg class="bi" width="16" height="16" fill="currentColor">
+                        <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#currency-dollar" />
+                    </svg>
+                    Donar</a>
             </div>
         </div>
     </div>
@@ -277,13 +284,17 @@
         //AUTOUPDATE
         //Recive el estado del proceso de autoupdate
         ipcRenderer.on("status-update", (event, text) => {
-            document.getElementById("text-info-update").innerHTML = text 
+            document.getElementById("text-info-update").innerHTML = text
         })
 
-        function checkUpdate(){
+        function checkUpdate() {
             //document.getElementById("text-info-update").innerHTML = "145.56 Kb/s<br>77.54% (44.72Mb/57.67Mb)"
             //document.getElementById("text-info-update").innerHTML = "Hay actualizaciones ..."
             ipcRenderer.send("checkUpdateApp")
+        }
+
+        function openPayPal(){
+            ipcRenderer.send("openPayPal")
         }
 
         generateQR()

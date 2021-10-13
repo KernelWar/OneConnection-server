@@ -13,7 +13,7 @@
 })();
 */
 const environment = require('./environment/environment')
-const { app, BrowserWindow, nativeImage, ipcMain, ipcRenderer } = require('electron')
+const { app, BrowserWindow, nativeImage, ipcMain, shell } = require('electron')
 const log = require('electron-log');
 const { autoUpdater } = require("electron-updater");
 
@@ -221,6 +221,10 @@ ipcMain.on("finalizeStreamWebContent", () => {
 
 ipcMain.on("checkUpdateApp", () => {
     autoUpdater.checkForUpdatesAndNotify();
+})
+
+ipcMain.on("openPayPal", () => {
+    shell.openExternal("https://paypal.me/KernelWar?locale.x=es_XC")
 })
 
 const instances = app.requestSingleInstanceLock()
