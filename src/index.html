@@ -130,9 +130,7 @@
                     </svg>
                     Buscar actualizaciones</a>
                 <a id="item-donate" class="dropdown-item  btn-sm" href="#" onclick="openPayPal()">
-                    <svg class="bi" width="16" height="16" fill="currentColor">
-                        <use xlink:href="../node_modules/bootstrap-icons/bootstrap-icons.svg#currency-dollar" />
-                    </svg>
+                    <img src="./img/kernelwar.png" alt="KernelWar" width="16">
                     Donar</a>
             </div>
         </div>
@@ -224,7 +222,7 @@
         var version = require('./../package.json').version
         $('html head').find('title').text('OneConnection server ' + version);
         $("#title-frame").text('OneConnection server ' + version)
-        const { remote, ipcRenderer, ipcMain } = require("electron");
+        const { remote, ipcRenderer, ipcMain, dialog } = require("electron");
         var frameStream
         var stream = null
         var streamActive = false
@@ -293,7 +291,7 @@
             ipcRenderer.send("checkUpdateApp")
         }
 
-        function openPayPal(){
+        function openPayPal() {
             ipcRenderer.send("openPayPal")
         }
 
@@ -331,9 +329,12 @@
                     if (element['address'] != "127.0.0.1") {
                         element['name'] = item
                         $("#list-interface").append(Mustache.render($("#templateNetworkInterface").html(), element))
+                    } else if (element['address'] == "127.0.0.1") {
+                        ipcRenderer.send("checkInterface")
                     }
                 }
             }
+
         })
         $("#btn-minimizade").click(function () {
             $(this).blur();

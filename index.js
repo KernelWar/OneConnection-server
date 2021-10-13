@@ -13,7 +13,7 @@
 })();
 */
 const environment = require('./environment/environment')
-const { app, BrowserWindow, nativeImage, ipcMain, shell } = require('electron')
+const { app, BrowserWindow, nativeImage, ipcMain, shell, dialog } = require('electron')
 const log = require('electron-log');
 const { autoUpdater } = require("electron-updater");
 
@@ -74,9 +74,14 @@ fs.readFile(pathConfigServer, function (err, data) {
 
         global._port = port
         global._host = host
+        if (host == "127.0.0.1") {
+            checkInterface()
+        }
+
         appexpress.get('/', (req, res) => {
             res.send("API funcionando !!")
         })
+       checkPort()
         server.listen(appexpress.get('port'), appexpress.get('host'), () => {
             console.log(`Server listening on ${host}:${port}`)
         })
@@ -184,12 +189,41 @@ function writeFileServerConfiguration() {
     })
 }
 
+function checkInterface(){
+    const options = {
+        type: 'info',
+        title: 'Atención',
+        message: 'Necesitas estar conectado a una red',
+        detail: `Una vez que te conectes a una red WiFi o cableada dirígete a\nConfiguración>Interfaz de red y selecciona una opción`,
+    };
+    dialog.showMessageBox(null, options);
+}
+
+function checkPort(){
+    server.on('error', (e) => {
+        console.log('ERROR SERVER -> ', e)
+        if (e.code === 'EADDRINUSE') {
+            setTimeout(() => {                    
+                server.close();
+                const options = {
+                    type: 'error',
+                    title: 'Atención',
+                    message: "Puerto ocupado, OneConnection server DESACTIVADO",
+                    detail: 'La aplicación intenta iniciar en el puerto '+port+" pero ya está siendo ocupado por otro programa\ndiríjase a Configuración>Puerto e ingrese un puerto valido",
+                };
+                dialog.showMessageBox(null, options);
+            }, 1000);
+        }
+    });
+}
+
 
 function resetSocketServer() {
     socket.deleteSocketServer()
     server.close()
     server = http.createServer(appexpress)
-    socket.initServer(server)
+    socket.initServer(server)    
+    checkPort()
     server.listen(appexpress.get('port'), appexpress.get('host'), () => {
         console.log(`Reset: Server listening on ${host}:${port}`)
     })
@@ -225,6 +259,10 @@ ipcMain.on("checkUpdateApp", () => {
 
 ipcMain.on("openPayPal", () => {
     shell.openExternal("https://paypal.me/KernelWar?locale.x=es_XC")
+})
+
+ipcMain.on("checkInterface", () => {
+    checkInterface()
 })
 
 const instances = app.requestSingleInstanceLock()
