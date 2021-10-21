@@ -323,18 +323,18 @@
         $("#item-network").click(function () {
             let interfaces = os.networkInterfaces()
             $("#list-interface").html("")
+            let networks = 0
             for (const item in interfaces) {
-                if (interfaces.hasOwnProperty(item)) {
-                    const element = interfaces[item][1];
-                    if (element['address'] != "127.0.0.1") {
-                        element['name'] = item
-                        $("#list-interface").append(Mustache.render($("#templateNetworkInterface").html(), element))
-                    } else if (element['address'] == "127.0.0.1") {
-                        ipcRenderer.send("checkInterface")
-                    }
+                networks++
+                const element = interfaces[item][1];
+                if (element['address'] != "127.0.0.1") {
+                    element['name'] = item
+                    $("#list-interface").append(Mustache.render($("#templateNetworkInterface").html(), element))
                 }
             }
-
+            if (networks == 1) {
+                ipcRenderer.send("checkInterface")
+            }
         })
         $("#btn-minimizade").click(function () {
             $(this).blur();
