@@ -7,7 +7,7 @@ function createMainWindow() {
     const window = new BrowserWindow({
         width: 360,
         height: 600,
-        resizable: true,
+        resizable: process.env.NODE_ENV != 'production',
         webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true,
